@@ -23,6 +23,7 @@ def maj_snake(direction) :
     if tête in snake[1 : ] :
         return False
     elif tête == fruit :
+        fruit = None
         while fruit == None :
             nouveau_fruit = [randint(0,nb_cases_x-1), randint(0,nb_cases_y-1)]
             fruit = nouveau_fruit if nouveau_fruit not in snake else None
@@ -55,20 +56,20 @@ en_cours = True #Le jeu est en cours
 direction = [1,0] #Première valeur : 0=bouge pas ; 1=va à droite ; -1=va à gauche
                   #Seconde valeur :  0=bouge pas ; 1=va en bas ; -1=va en haut
 while en_cours == True : #tant que le jeu est en cours,
-    pygame.time.Clock().tick(20) #ne fait la boucle que toutes les 30ms
+    pygame.time.Clock().tick(20) #ne fait la boucle que toutes les laps de temps donnés
     for event in pygame.event.get() : #on regarde tous les événements de la liste pygame.event
         if event.type == pygame.QUIT : #pygame.QUIT = fonction pour sortir du jeu
             en_cours = False
         if event.type == pygame.KEYDOWN :
-            if event.key == pygame.K_ESCAPE : #la touche 'expace' permet de fermer le jeu
+            if event.key == pygame.K_ESCAPE : #la touche 'espace' permet de fermer le jeu
                 en_cours = False
-            if event.key == pygame.K_RIGHT and not direction == [-1,0] : #100 correspond à la lettre d du clavier azerty ; on va à droite
+            if event.key == pygame.K_RIGHT and not direction == [-1,0] : #on va à droite si on n'est pas à gauche
                 direction = [1,0]
-            if event.key == pygame.K_LEFT and not direction == [1,0] : #97 correspond à la lettre q du clavier azerty ; on va à gauche
+            if event.key == pygame.K_LEFT and not direction == [1,0] : #on va à gauche si on n'est pas à droite
                 direction = [-1,0]
-            if event.key == pygame.K_UP and not direction == [0,1] : #119 correspond à la lettre z du clavier azerty ; on va en haut
+            if event.key == pygame.K_UP and not direction == [0,1] : #on va en haut si on n'est pas en bas
                 direction = [0,-1]
-            if event.key == pygame.K_DOWN and not direction == [0,-1] : #115 correspond à la lettre s du clavier azerty ; on va en bas
+            if event.key == pygame.K_DOWN and not direction == [0,-1] : #on va en bas si on n'est pas en haut
                 direction = [0,1]
     #Update
     if maj_snake(direction) == False :
