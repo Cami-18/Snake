@@ -84,6 +84,6 @@ while en_cours == True : #tant que le jeu est en cours,
         en_cours = False
         pygame.quit()   #Permet de fermer la fenêtre de jeu quand le jeu est terminé !
         
-if en_cours == False : #pour quitter le jeu
+if en_cours == False and maj_snake(direction) == True : #Pour fermer la fenêtre de jeu si on appuie sur 'échap'
     print("Vous avez quitté le jeu.")
     pygame.quit()
