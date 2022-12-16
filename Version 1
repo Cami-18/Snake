@@ -61,7 +61,7 @@ while en_cours == True : #tant que le jeu est en cours,
         if event.type == pygame.QUIT : #pygame.QUIT = fonction pour sortir du jeu
             en_cours = False
         if event.type == pygame.KEYDOWN :
-            if event.key == pygame.K_ESCAPE : #la touche 'espace' permet de fermer le jeu
+            if event.key == pygame.K_ESCAPE : #la touche 'échap' permet de fermer le jeu
                 en_cours = False
             if event.key == pygame.K_RIGHT and not direction == [-1,0] : #on va à droite si on n'est pas à gauche
                 direction = [1,0]
@@ -83,3 +83,7 @@ while en_cours == True : #tant que le jeu est en cours,
         print("Perdu !")
         en_cours = False
         pygame.quit()   #Permet de fermer la fenêtre de jeu quand le jeu est terminé !
+        
+if en_cours == False : #pour quitter le jeu
+    print("Vous avez quitté le jeu.")
+    pygame.quit()
