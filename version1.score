@@ -1,0 +1,111 @@
+import pygame
+from random import randint
+# initialisation du score
+
+#Liste des fonctions :
+def dessin_fruit() :
+    couleur_fruit = pygame.Color(210,45,60) #c'est du rouge
+    forme_fruit = pygame.Rect((fruit[0]*l_case, fruit[1]*h_case),(l_case,h_case)) #Coordonnnées du sommet en haut à gauche, largeur, hauteur
+    pygame.draw.rect(fen, couleur_fruit, forme_fruit) #Création du fruit
+
+def dessin_snake() :
+    couleur_snake = pygame.Color(60,215,60) #c'est du vert
+    for cellule in snake : #pour chaque cellule du serpent
+        forme_cellule = pygame.Rect((cellule[0]*l_case, cellule[1]*h_case),(l_case,h_case)) #on crée la forme de la cellule
+        pygame.draw.rect(fen, couleur_snake, forme_cellule) #on dessine une cellule du serpent
+        
+score=0 # initialisation du score
+def maj_snake(direction) :
+    global fruit
+    dirX, dirY = direction
+    #Pour le déplacement, on va supprimer la queue et créer une cellule devant la tête
+    tête = snake[0].copy()
+    tête[0] = (tête[0] + dirX) % nb_cases_x #le modulo permet de faire apparaître la tête à gauche quand on touche  la bordure droite par ex
+    tête[1] = (tête[1] + dirY) % nb_cases_y
+    if tête in snake[1 : ] :
+        return False
+    elif tête == fruit :
+        score+=1  # pour la mise à jour du core
+        fruit = None
+        while fruit == None :
+            nouveau_fruit = [randint(0,nb_cases_x-1), randint(0,nb_cases_y-1)]
+            fruit = nouveau_fruit if nouveau_fruit not in snake else None
+    else:
+        snake.pop()
+    snake.insert(0, tête)
+    return True
+   
+
+#Création de la fenêtre
+l = 640 #largeur de la fenêtre
+h = 640 #hauteur de la fenêtre
+fen = pygame.display.set_mode((l,h)) #création de la fenêtre
+bg_color = pygame.Color(20,40,80) #Couleur du fond
+
+#Création de la grille
+nb_cases_x = 64
+nb_cases_y = 64
+l_case = l // nb_cases_x #largeur de chaque case
+h_case = h // nb_cases_y #hauteur de chaque case
+
+#Création du serpent
+snake_x, snake_y = nb_cases_x // 4, nb_cases_y // 2 #Position de départ du serpent
+snake = [[snake_x, snake_y],[snake_x-1, snake_y],[snake_x-2, snake_y]] #Le serpent
+
+#Création de la nourriture
+fruit = [nb_cases_x//2, nb_cases_y//4]
+
+
+
+#Mode de jeu
+en_cours = True #Le jeu est en cours
+direction = [1,0] #Première valeur : 0=bouge pas ; 1=va à droite ; -1=va à gauche
+                  #Seconde valeur :  0=bouge pas ; 1=va en bas ; -1=va en haut
+
+while en_cours == True : # tant que le jeu est en cours
+    pygame.time.Clock().tick(20) #ne fait la boucle que toutes les laps de temps donnés
+    for event in pygame.event.get() : #on regarde tous les événements de la liste pygame.event
+        if event.type == pygame.QUIT : #pygame.QUIT = fonction pour sortir du jeu
+            en_cours = False
+        if event.type == pygame.KEYDOWN :
+            if event.key == pygame.K_ESCAPE : #la touche 'espace' permet de fermer le jeu
+                en_cours = False
+            if event.key == pygame.K_RIGHT and not direction == [-1,0] : #on va à droite si on n'est pas à gauche
+                direction = [1,0]
+            if event.key == pygame.K_LEFT and not direction == [1,0] : #on va à gauche si on n'est pas à droite
+                direction = [-1,0]
+            if event.key == pygame.K_UP and not direction == [0,1] : #on va en haut si on n'est pas en bas
+                direction = [0,-1]
+            if event.key == pygame.K_DOWN and not direction == [0,-1] : #on va en bas si on n'est pas en haut
+                direction = [0,1]
+            
+ 
+           
+   # Creer le  font object qui est un objet de type police
+font = pygame.font.Font(None, 36)
+
+# Rendu du score sous forme de surface
+score_surface = font.render(f"Score: {score}", True, (255, 255, 255)) # couleur blanche
+
+# Afficher la surface du texte à l'écran'
+fen.blit(text_surface, (10, 10))
+
+                                                     
+   # Pour mémoriser le fichier:                                                   
+ # Ouvrir le fichier en mode écriture
+with open("scores.txt", "w") as f:
+  # Ecrire le score dans le fichier
+  f.write(str(score))
+                                                                                         
+                                                                                          
+
+ #Update
+  if maj_snake(direction) == False :
+         print("Perdu !")
+         en_cours = False
+        
+    # Draw                            
+  fen.fill(bg_color) #Ajout de la couleur sur la fenêtre
+  dessin_snake()
+  dessin_fruit()
+  pygame.display.update()
