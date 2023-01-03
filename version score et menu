@@ -106,6 +106,14 @@ def start_the_game():
         score_display = myfont.render('Score: ' + str(score), True, BLANC)
         fen.blit(score_display, (500, 50))
         pygame.display.update()
+        
+         # Pour mémoriser le fichier:                                                   
+        # Ouvrir le fichier en mode écriture
+        with open("scores_snake.txt", "r") as f:
+            previous_score = f.readlines()[-1][:-1]
+        with open('scores_snake.txt' , 'a') as f:
+            if previous_score == '_' or score > int(previous_score):
+                f.write(str(score) + '\n')
 
 l = 640 #largeur de la fenêtre
 h = 640 #hauteur de la fenêtre
@@ -147,7 +155,18 @@ skin_menu = pygame_menu.Menu(
     width=640
     )
     
-user_name = menu.add.label('Best score: ')
+#Recherche du meilleur score (s'il existe) pour l'afficher
+path= os.getcwd() + '\scores_snake.txt'
+if not os.path.isfile(path) :
+    with open("scores_snake.txt",'w') as f:
+        f.write('_\n')
+        
+with open("scores_snake.txt", "r") as f:
+    meilleur_score = f.readlines()[-1][:-1]    #lz [:-1] sert à couper le saut de ligne 
+    
+    
+menu.add.label('Best score: '+ meilleur_score)
+menu.add.label('Diamants: ')
 menu.add.button('Skins',skin_menu)
 menu.add.selector('Difficulty: ', [('Easy', 1), ('Hard', 2)], onchange=set_difficulty)
 menu.add.button('Play', start_the_game)
@@ -158,6 +177,7 @@ skin_menu.add.button('Ours', set_the_skin('ours'),300)
 skin_menu.add.button('Hérisson', set_the_skin('herisson'),400)
 skin_menu.add.button('Girafe', set_the_skin('girafe'),500)
 skin_menu.add.button('?', set_the_skin('?'),600)
+
 police = pygame.font.SysFont('freesans', 50)
 
 if __name__ == '__main__':
