@@ -65,7 +65,13 @@ def draw_text(text, font, text_col, x, y):
   screen.blit(img, (x, y))
 
 def start_the_game():
-    global fen, snake_x,snake_y, snake,fruit
+    global fen, snake_x,snake_y, snake,fruit, score
+    #Création du serpent
+    snake_x, snake_y = nb_cases_x // 4, nb_cases_y // 2 #Position de départ du serpent
+    snake = [[snake_x, snake_y],[snake_x-1, snake_y],[snake_x-2, snake_y]] #Le serpent
+    #Création de la nourriture
+    fruit = [nb_cases_x//2, nb_cases_y//2]
+    score = 0
     pygame.font.init() # initialisation de l'affichage pour le score 
     
     #Mode de jeu
@@ -127,15 +133,6 @@ nb_cases_x = 64
 nb_cases_y = 64
 l_case = l // nb_cases_x #largeur de chaque case
 h_case = h // nb_cases_y #hauteur de chaque case
-
-#Création du serpent
-snake_x, snake_y = nb_cases_x // 4, nb_cases_y // 2 #Position de départ du serpent
-snake = [[snake_x, snake_y],[snake_x-1, snake_y],[snake_x-2, snake_y]] #Le serpent
-
-#Création de la nourriture
-fruit = [nb_cases_x//2, nb_cases_y//2]
-score = 0
-pygame.font.init() # initialisation de l'affichage pour le score 
 
 
 # Code:
