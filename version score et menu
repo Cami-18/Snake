@@ -1,4 +1,4 @@
-import pygame
+import pygame, os
 import pygame_menu
 from pygame_menu.examples import create_example_window
 from random import randint
@@ -159,7 +159,7 @@ if not os.path.isfile(path) :
         f.write('_\n')
         
 with open("scores_snake.txt", "r") as f:
-    meilleur_score = f.readlines()[-1][:-1]    #lz [:-1] sert à couper le saut de ligne 
+    meilleur_score = f.readlines()[-1][:-1]    #le [:-1] sert à couper le saut de ligne 
     
     
 menu.add.label('Best score: '+ meilleur_score)
