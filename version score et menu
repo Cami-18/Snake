@@ -172,6 +172,7 @@ h_case = h // nb_cases_y #hauteur de chaque case
 
 
 # Code:
+background_theme = pygame_menu.themes.THEME_BLUE
 menu = pygame_menu.Menu(
     height=640,
     theme=pygame_menu.themes.THEME_BLUE,
