@@ -1,10 +1,8 @@
 import pygame, os
 import pygame_menu
+import pygame.image
 from pygame_menu.examples import create_example_window
 from random import randint
-import time
-
-
 from typing import Tuple, Any
 
 surface = create_example_window('Menu', (640, 640))
@@ -165,7 +163,9 @@ with open("scores_snake.txt", "r") as f:
     
     
 menu.add.label('Best score: '+ meilleur_score)
-menu.add.label('Diamants: ')
+# afficher le nombre de diamants sur le menu
+label = pygame.font.Font(None, 32).render(f"Diamants: {diamonds}", 1, (255, 255, 255))
+menu.blit(label, (10, 10))
 menu.add.button('Skins',skin_menu)
 menu.add.selector('Difficulty: ', [('Easy', 1), ('Hard', 2)], onchange=set_difficulty)
 menu.add.button('Play', start_the_game)
@@ -184,19 +184,31 @@ if __name__ == '__main__':
     
     
     
-  # pour générer un nombre différent de diamant à chaque exécution du code
-  random.seed(time.time())
-# le nombre de diamants qu'on veut générer(ici entre 10 et 110)
-  nbr_diamants = random.randint(10, 110)
-  
- # créer une liste où garder les diamants
- Diamants = []
-# générer des diamants et les ajouter à la liste
-for i in range(nbr_diamants):
-  Diamants.append(random.randint(10, 110))
+    
+#
+# Initialiser la variable diamant
+diamonds = 0
+   
+# Chargez l'image du diamant
+diamond_image = pygame.image.load('image-diamant.png')
 
-# enregistrer les diamants dans un fichier
+# Mettez à l'échelle l'image du diamant à la taille souhaitée (l'image que j'ai téléchargée est trop grande et je n'en ai pas trouvé d'autre petites)
+diamond_image = pygame.transform.scale(diamond_image, (l_case, h_case))
 
-with open('diamants.txt', 'w') as f:
-  for diamant in Diamants:
-    f.write(str(diamant) + '\n')
+# Convertir l'image du diamant au même format de pixels que la surface d'affichage
+diamond_image = diamond_image.convert()
+
+#créer l'apparition du diamant chaque 15s(pygame.time.set_timer fonctionne en millisecondes)'
+pygame.time.set_timer(diamond_image, 15000)
+
+# Afficher le diamant de manière aléatoire
+x = randint(0, nb_cases_x-1)
+y = randint(0, nb_cases_y-1)
+diamond_rect = pygame.Rect((x*l_case, y*h_case), (l_case, h_case))
+fen.blit(diamond_image, diamond_rect)
+diamonds += 1
+
+
+# Sauvegarder le nombre de diamants à la fin du jeu
+with open("diamonds.txt", "w") as f:
+    f.write(str(diamonds))
