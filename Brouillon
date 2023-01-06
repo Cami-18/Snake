@@ -1,0 +1,111 @@
+import pygame
+from pygame.locals import *
+from random import randint
+
+def dessin_fruit() :
+    surface.blit(img_fruit,tuple(fruit)) #Création du fruit
+
+def maj_snake(direction) :
+    global fruit
+    global tête
+    dirX, dirY = direction
+    if dirX == 1 :
+        tête_rect.left = (tête_rect.left + l_case) % l
+    if dirX == -1 :
+        tête_rect.left = (tête_rect.left - l_case) % l
+    if dirY == 1 :
+        tête_rect.top = (tête_rect.top + h_case) % h
+    if dirY == -1 :
+        tête_rect.top = (tête_rect.top - h_case) % h
+    surface.blit(tête,tête_rect)
+    '''if tête in snake[1 : ] :
+        return False'''
+    #img_fruit_rect = img_fruit.get_rect(topleft=(fruit[0],fruit[1]))
+    #if tête_rect.x == img_fruit_rect.x and tête_rect.y == img_fruit_rect.y :
+    if tête.center == (fruit[0],fruit[1]) :
+        fruit = [randint(0,l-1), randint(0,h-1)]
+    
+    '''else :
+        snake.pop()
+    snake.insert(0, tête)'''
+        
+    
+#Liste de couleurs qui peuvent servir
+ROUGE = Color(255,0,0) #ordre RVB
+VERT = Color(0,255,0)
+BLEU = (0,0,255)
+NOIR = (0,0,0)
+BLANC = (255,255,255)
+JAUNE = (255,255,0)
+VIOLET = (255,0,255)
+ROUGE_FONCE = (142,5,5)
+VIOLET_ROSE = (142,5,119)
+MARRON = (145,35,30)
+BLEU_CIEL = (185,240,240)
+
+#on initialise pygame
+pygame.init()
+
+#Création de la fenêtre
+l = 1200 #largeur de la fenêtre
+h = 600 #hauteur de la fenêtre
+surface = pygame.display.set_mode((l,h)) #création de la fen ;
+
+ecran = pygame.image.load("fond_simple.png").convert() #charge une surface et la convertit
+tête = pygame.image.load("CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
+tête = pygame.transform.scale(tête,(40,40))
+tête_rect = tête.get_rect(topleft = (40,0))
+corps = pygame.image.load("CanetonD.png").convert_alpha()
+corps = pygame.transform.scale(corps,(40,40))
+corps_rect = corps.get_rect(topleft = (0,0))
+snake = [tête , corps]
+
+
+img_fruit = pygame.image.load("fruit.png").convert_alpha() #idem mais conserve la transparence de l'img
+img_fruit = pygame.transform.scale(img_fruit,(40,40)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
+img_fruit_rect = img_fruit.get_rect(topleft = (40,0))
+
+#Création de la grille
+nb_cases_x = 30
+nb_cases_y = 15
+l_case = l // nb_cases_x #largeur de chaque case
+h_case = h // nb_cases_y #hauteur de chaque case
+
+#Création de la nourriture
+fruit = [nb_cases_x//2, nb_cases_y//2]
+
+#boucle événementielle
+continuer = True
+direction = [1,0] #Première valeur : 0=bouge pas ; 1=va à droite ; -1=va à gauche
+                  #Seconde valeur :  0=bouge pas ; 1=va en bas ; -1=va en haut
+while continuer :
+    pygame.time.Clock().tick(12) #ne fait la boucle que toutes les laps de temps donnés
+    for event in pygame.event.get() : #on regarde tous les événements de la liste pygame.event
+        if event.type == pygame.QUIT : #pygame.QUIT = fonction pour sortir du jeu
+            continuer = False
+        if event.type == pygame.KEYDOWN :
+            if event.key == pygame.K_ESCAPE : #la touche 'echap' permet de fermer le jeu
+                continuer = False
+            if event.key == pygame.K_RIGHT and not direction == [-1,0] : #on va à droite si on n'est pas à gauche
+                direction = [1,0]
+            if event.key == pygame.K_LEFT and not direction == [1,0] : #on va à gauche si on n'est pas à droite
+                direction = [-1,0]
+            if event.key == pygame.K_UP and not direction == [0,1] : #on va en haut si on n'est pas en bas
+                direction = [0,-1]
+            if event.key == pygame.K_DOWN and not direction == [0,-1] : #on va en bas si on n'est pas en haut
+                direction = [0,1]
+                  
+    #Logique du jeu :
+
+    #Affichage du jeu :
+    surface.blit(ecran,(0,0))
+    maj_snake(direction)
+    dessin_fruit()
+    surface.blit(corps,corps_rect)
+    pygame.display.flip()
+    pygame.display.update()
+    
+    
+    
+    
+pygame.quit()
