@@ -89,7 +89,6 @@ def start_the_game():
     fenetre.blit(couverture,(0,0))
     
     continuer = True
-    pygame.font.init()
     myfont = pygame.font.Font(None, 36)
     depUp = depDown = depRight = depLeft = move_init = False
     #Changement de la variable de déplacement
@@ -134,40 +133,33 @@ def start_the_game():
                             depLeft = move_init = True
                             pygame.mixer.Sound.play(bruit_mouvement)
 
-        #Chargement des objets dans le jeu
-        fenetre.blit(Caneton, (-5,5))
-        fenetre.blit(Canard, (0,0))
-
         #Coordonnées du morceau précédent données à chaque morceau
         for i in range(length-1,0,-1):
             x[i] = x[i-1]
             y[i] = y[i-1]
             
         fenetre.blit(couverture,(0,0)) #Remplissage de l'écran par le fond pour effacer les parties du corps précédentes
-        
-        for i in range(1,length): #Chargement du corps du serpent
-            couverture.blit(Caneton, (x[i], y[i]))
+
 
         # Modification de la position de la tête du serpent
         if depUp:
             y[0] = y[0] - step #Déplacement de la position de la tête
-            fenetre.blit(couverture, (0,0)) #Chargement du fond d'écran, de la tête
             fenetre.blit(Canard, (x[0], y[0]))
 
         if depDown:
             y[0] = y[0] + step
-            fenetre.blit(couverture, (0,0))
             fenetre.blit(Canard, (x[0], y[0]))
 
         if depRight:
             x[0] = x[0] + step
-            fenetre.blit(couverture, (0,0))
             fenetre.blit(Canard, (x[0], y[0]))
 
         if depLeft:
             x[0] = x[0] - step
-            fenetre.blit(couverture, (0,0))
             fenetre.blit(Canard, (x[0], y[0]))
+            
+         for i in range(1,length): #Chargement du corps du serpent
+            fenetre.blit(Caneton, (x[i], y[i]))
 
         #Verification que le serpent ne touche pas les bords
         if x[0] < fenetre_rect.left:
@@ -211,8 +203,6 @@ def start_the_game():
         #Definition du meilleur score parmi les parties jouées
         if score > highscore:
             highscore = score
-
-        pygame.display.flip()
 
         #Ajout d'un retard à la boucle pour obtenir la vitesse de déplacement voulue
         time.sleep (vitesse / 1000.0)
@@ -289,7 +279,7 @@ h = 640 #hauteur de la fenêtre
 fenetre = pygame.display.set_mode((l,h)) #création de la fenêtre
 fenetre_rect = fenetre.get_rect()
 couverture =  pygame.image.load("fond_simple.png").convert() #Fond
-couverture = pygame.Surface(fenetre.get_size()) #On adapte l'img de fond à la taille de la fenetre
+couverture = pygame.transform.scale(couverture,fenetre.get_size()) #On adapte l'img de fond à la taille de la fenetre
 fenetre.blit(couverture,(0,0))
 pygame.display.set_caption("Snake") #On nomme la fenêtre de jeu
 
