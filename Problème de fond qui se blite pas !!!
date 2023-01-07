@@ -158,7 +158,7 @@ def start_the_game():
             x[0] = x[0] - step
             fenetre.blit(Canard, (x[0], y[0]))
             
-         for i in range(1,length): #Chargement du corps du serpent
+        for i in range(1,length): #Chargement du corps du serpent
             fenetre.blit(Caneton, (x[i], y[i]))
 
         #Verification que le serpent ne touche pas les bords
