@@ -59,8 +59,38 @@ def set_difficulty(selected: Tuple, value: Any) -> None:
     else:
         tp = 24
 
-def set_the_skin():
-    pass
+def set_the_skin(type):
+    global Tete, Corps, fruit,rang 
+    if type ==100:
+        rang = 0
+        Tete = Serpent
+        Corps = CorpsSerpent
+        fruit = fruit
+    elif type ==200:
+        rang = 1
+        Tete= Canard
+        Corps = Caneton
+        fruit = fruit
+    elif type == 300:
+        rang = 2
+        Tete = Poule
+        Corps = Poussin
+        fruit = fruit
+    elif type == 400:
+        rang = 3
+        Tete = Mouton
+        Corps = Loup
+        fruit = fruit
+    elif type == 500:
+        rang = 4
+        Tete = Girafe
+        Corps = CouGirafe
+        fruit= fruit
+    else :
+        rang = 5
+        Tete = Ours
+        Corps = Abeille
+        fruit = fruit
 
 #Fonction définissant si il y a une collision entre les coordonnées du serpent et d'autres coordonnées, comme celles des fruits ou des différentes parties du serpent
 def collision(x1,y1,x2,y2, size_snake, size_fruit):
