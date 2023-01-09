@@ -1,10 +1,7 @@
 #Importation des bibliothèques nécessaires
 from pygame.locals import *
 from random import randint
-import pygame
-import time
-import os
-import pygame_menu
+import pygame,pygame_menu, time, os
 from pygame_menu.examples import create_example_window
 from typing import Tuple, Any
 
@@ -48,6 +45,7 @@ def run_menu():
     menu.add.selector('Difficulté : ', [('Moyenne', 1), ('Ardue', 2), ('Très ardue', 3), ('Facile',4)], onchange=set_difficulty)
     menu.add.button('Jouer', start_the_game)
     menu.add.button('Quitter', pygame_menu.events.EXIT)
+    menu.add.button('Règles et commandes', menu_règles)
     menu.add.selector('Son : ', [('On', 1), ('Off', 2)], onchange=gestion_son)
     menu.mainloop(surface)
     
@@ -74,7 +72,16 @@ def gestion_son(selected: Tuple, value: Any) -> None:
         son = False
 
 def set_the_skin(type):
-    global TêteD, TêteG, TêteH, TêteB, CorpsD, CorpsG, CorpsH, CorpsB, fruit 
+    global TêteD, TêteG, TêteH, TêteB, CorpsD, CorpsG, CorpsH, CorpsB, fruit, reserve
+    path= os.getcwd() + '\Personnages.txt'
+    if not os.path.isfile(path) :
+        with open("Personnages.txt",'w') as f:
+            f.write('100000') #par défaut, le joueur ne peut utiliser que le serpent, d'où le 1 dans la première position, et les 0 dans les autres 
+        
+    with open("Personnages.txt", "r") as f:
+        liste_perso = f.read()
+        reserve = int(reserve)
+        
     if type ==100:
         TêteD = SerpentD
         TêteH = SerpentH
@@ -85,7 +92,7 @@ def set_the_skin(type):
         CorpsG = CorpsSerpentG
         CorpsB = CorpsSerpentB
         fruit = Souris
-    elif type ==200:
+    elif type ==200 and (reserve>= 20 or liste_perso[1]=='1'):
         TêteD = CanardD
         TêteH = CanardH
         TêteG = CanardG
@@ -95,7 +102,10 @@ def set_the_skin(type):
         CorpsG = CanetonG
         CorpsB = CanetonB
         fruit = Pain
-    elif type == 300:
+        if liste_perso[1]=='0':
+                reserve -= 20
+                liste_perso = liste_perso[0] + '1' + liste_perso[2:5]
+    elif type == 300 and (reserve >= 40 or liste_perso[2] == '1'):
         TêteD = PouleD
         TêteH = PouleH
         TêteG = PouleG
@@ -105,7 +115,10 @@ def set_the_skin(type):
         CorpsG = PoussinG
         CorpsB = PoussinB
         fruit = Asticot
-    elif type == 400:
+        if liste_perso[2]=='0':
+                reserve -= 40
+                liste_perso = liste_perso[:1] + '1' + liste_perso[3:5]
+    elif type == 400 and (reserve >= 60 or liste_perso[3] =='1'):
         TêteD = MoutonD
         TêteH = MoutonH
         TêteG = MoutonG
@@ -115,7 +128,10 @@ def set_the_skin(type):
         CorpsG = LoupG
         CorpsB = LoupB
         fruit = TouffeHerbe
-    elif type == 500:
+        if liste_perso[3]=='0':
+                reserve -= 60
+                liste_perso = liste_perso[:3] + '1' + liste_perso[4:5]
+    elif type == 500 and (reserve >= 80 or liste_perso[4] =='1'):
         TêteD = GirafeD
         TêteH = GirafeH
         TêteG = GirafeG
@@ -125,7 +141,10 @@ def set_the_skin(type):
         CorpsG = CouGirafeG
         CorpsB = CouGirafeB
         fruit= Baobab
-    else :
+        if liste_perso[4]==0:
+                reserve -= 80
+                liste_perso = liste_perso[:4] + '1' + liste_perso[5]
+    elif (reserve >=100 or liste_perso[5] =='1') :
         TêteD = OursD
         TêteH = OursH
         TêteG = OursG
@@ -135,7 +154,27 @@ def set_the_skin(type):
         CorpsG = AbeilleG
         CorpsB = AbeilleB
         fruit = PotDeMiel
+        if liste_perso[5]=='0':
+                reserve -= 100
+                liste_perso = liste_perso[:5] + '1'
+        else : #ce cas signifie que le joueur a chosi un personnage qu'il n'a pas encore acheté et qu'il ne peut pas encore payer 
+            message_erreur()
+    with open("diamants.txt", "a") as f:
+        f.write(str(reserve) + '\n')
+    with open("Personnages.txt", "w") as f: #on écrase le document précédent
+        f.write(liste_perso )
 
+def message_erreur():
+    menu_erreur =  pygame_menu.Menu(
+        height=440,
+        theme=pygame_menu.themes.THEME_BLUE,
+        title='Dommage !',
+        width=640
+        )
+    menu_erreur.add.label("Vous n'avez pas assez de diamants")
+    menu_erreur.add.button("Jouer pour en récolter", start_the_game)
+    menu_erreur.add.button('Choisir un autre personnage', skin_menu)
+    menu_erreur.mainloop(surface) 
 
 #Fonction définissant si il y a une collision entre les coordonnées du serpent et d'autres coordonnées, comme celles des fruits ou des différentes parties du serpent
 def collision(x1,y1,x2,y2, size_snake, size_fruit):
@@ -384,89 +423,90 @@ def start_the_game():
 pygame.init() #On initialise la bibliothèque pygame
 
 surface = create_example_window('Menu', (640, 640))
+dossier = os.getcwd() + "\Images à télécharger pour le jeu\\"
 
 #Chargement des bruitages du jeu
-bruit_mouvement = pygame.mixer.Sound("move.wav")
-bruit_collision = pygame.mixer.Sound("collision.wav")
+bruit_mouvement = pygame.mixer.Sound(dossier+"move.wav")
+bruit_collision = pygame.mixer.Sound(dossier+"collision.wav")
 
 #Chargement des images du jeu :
-SerpentD = pygame.image.load("SerpentD.png").convert_alpha() #idem mais conserve la transparence de l'img
+SerpentD = pygame.image.load(dossier+"SerpentD.png").convert_alpha() #idem mais conserve la transparence de l'img
 SerpentD = pygame.transform.scale(SerpentD,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
 SerpentH = pygame.transform.rotate(SerpentD, 90)
 SerpentG = pygame.transform.rotate(SerpentH, 90)
 SerpentB = pygame.transform.rotate(SerpentG, 90)
-CorpsSerpentD = pygame.image.load("CorpsSerpentD.png").convert_alpha()
+CorpsSerpentD = pygame.image.load(dossier+"CorpsSerpentD.png").convert_alpha()
 CorpsSerpentD = pygame.transform.scale(CorpsSerpentD,(25,25))
 CorpsSerpentH = pygame.transform.rotate(CorpsSerpentD, 90)
 CorpsSerpentG = pygame.transform.rotate(CorpsSerpentH, 90)
 CorpsSerpentB = pygame.transform.rotate(CorpsSerpentG, 90)
-Souris = pygame.image.load("Souris.png").convert_alpha() #idem mais conserve la transparence de l'img
+Souris = pygame.image.load(dossier+"Souris.png").convert_alpha() #idem mais conserve la transparence de l'img
 Souris = pygame.transform.scale(Souris,(35,35))
 
-CanardD = pygame.image.load("CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
+CanardD = pygame.image.load(dossier+"CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
 CanardD = pygame.transform.scale(CanardD,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
 CanardH = pygame.transform.rotate(CanardD, 90)
 CanardG = pygame.transform.rotate(CanardH, 90)
 CanardB = pygame.transform.rotate(CanardG, 90)
-CanetonD = pygame.image.load("CanetonD.png").convert_alpha()
+CanetonD = pygame.image.load(dossier+"CanetonD.png").convert_alpha()
 CanetonD = pygame.transform.scale(CanetonD,(25,25))
 CanetonH = pygame.transform.rotate(CanetonD, 90)
 CanetonG = pygame.transform.rotate(CanetonH, 90)
 CanetonB = pygame.transform.rotate(CanetonG, 90)
-Pain = pygame.image.load("Pain.png").convert_alpha() #idem mais conserve la transparence de l'img
+Pain = pygame.image.load(dossier+"Pain.png").convert_alpha() #idem mais conserve la transparence de l'img
 Pain = pygame.transform.scale(Pain,(35,35))
 
 
-PouleD = pygame.image.load("PouleD.png").convert_alpha()
+PouleD = pygame.image.load(dossier+"PouleD.png").convert_alpha()
 PouleD = pygame.transform.scale(PouleD,(35,35))
 PouleH = pygame.transform.rotate(PouleD, 90)
 PouleG = pygame.transform.rotate(PouleH, 90)
 PouleB = pygame.transform.rotate(PouleG, 90)
-PoussinD = pygame.image.load("PoussinD.png").convert_alpha()
+PoussinD = pygame.image.load(dossier+"PoussinD.png").convert_alpha()
 PoussinD = pygame.transform.scale(PoussinD,(25,25))
 PoussinH = pygame.transform.rotate(PoussinD, 90)
 PoussinG = pygame.transform.rotate(PoussinH, 90)
 PoussinB = pygame.transform.rotate(PoussinG, 90)
-Asticot = pygame.image.load("Asticot.png").convert_alpha() #idem mais conserve la transparence de l'img
+Asticot = pygame.image.load(dossier+"Asticot.png").convert_alpha() #idem mais conserve la transparence de l'img
 Asticot = pygame.transform.scale(Asticot,(35,35))
 
-GirafeD = pygame.image.load("GirafeD.png").convert_alpha()
+GirafeD = pygame.image.load(dossier+"GirafeD.png").convert_alpha()
 GirafeD = pygame.transform.scale(GirafeD,(35,35))
 GirafeH = pygame.transform.rotate(GirafeD, 90)
 GirafeG = pygame.transform.rotate(GirafeH, 90)
 GirafeB = pygame.transform.rotate(GirafeG, 90)
-CouGirafeD = pygame.image.load("CouGirafeD.png").convert_alpha()
+CouGirafeD = pygame.image.load(dossier+"CouGirafeD.png").convert_alpha()
 CouGirafeD = pygame.transform.scale(CouGirafeD,(25,25))
 CouGirafeH = pygame.transform.rotate(CouGirafeD, 90)
 CouGirafeG = pygame.transform.rotate(CouGirafeH, 90)
 CouGirafeB = pygame.transform.rotate(CouGirafeG, 90)
-Baobab = pygame.image.load("Baobab.png").convert_alpha() #idem mais conserve la transparence de l'img
+Baobab = pygame.image.load(dossier+"Baobab.png").convert_alpha() #idem mais conserve la transparence de l'img
 Baobab = pygame.transform.scale(Baobab,(35,35))
 
-MoutonD = pygame.image.load("MoutonD.png").convert_alpha()
+MoutonD = pygame.image.load(dossier+"MoutonD.png").convert_alpha()
 MoutonD = pygame.transform.scale(MoutonD,(35,35))
 MoutonH = pygame.transform.rotate(MoutonD, 90)
 MoutonG = pygame.transform.rotate(MoutonH, 90)
 MoutonB = pygame.transform.rotate(MoutonG, 90)
-LoupD = pygame.image.load("LoupD.png").convert_alpha()
+LoupD = pygame.image.load(dossier+"LoupD.png").convert_alpha()
 LoupD = pygame.transform.scale(LoupD,(25,25))
 LoupH = pygame.transform.rotate(LoupD, 90)
 LoupG = pygame.transform.rotate(LoupH, 90)
 LoupB = pygame.transform.rotate(LoupG, 90)
-TouffeHerbe = pygame.image.load("TouffeHerbe.png").convert_alpha() #idem mais conserve la transparence de l'img
+TouffeHerbe = pygame.image.load(dossier+"TouffeHerbe.png").convert_alpha() #idem mais conserve la transparence de l'img
 TouffeHerbe = pygame.transform.scale(TouffeHerbe,(35,35))
 
-OursD = pygame.image.load("OursD.png").convert_alpha()
+OursD = pygame.image.load(dossier+"OursD.png").convert_alpha()
 OursD = pygame.transform.scale(OursD,(35,35))
 OursH = pygame.transform.rotate(OursD, 90)
 OursG = pygame.transform.rotate(OursH, 90)
 OursB = pygame.transform.rotate(OursG, 90)
-AbeilleD = pygame.image.load("AbeilleD.png").convert_alpha()
+AbeilleD = pygame.image.load(dossier+"AbeilleD.png").convert_alpha()
 AbeilleD = pygame.transform.scale(AbeilleD,(25,25))
 AbeilleH = pygame.transform.rotate(AbeilleD, 90)
 AbeilleG = pygame.transform.rotate(AbeilleH, 90)
 AbeilleB = pygame.transform.rotate(AbeilleG, 90)
-PotDeMiel = pygame.image.load("PotDeMiel.png").convert_alpha() #idem mais conserve la transparence de l'img
+PotDeMiel = pygame.image.load(dossier+"PotDeMiel.png").convert_alpha() #idem mais conserve la transparence de l'img
 PotDeMiel = pygame.transform.scale(PotDeMiel,(35,35))
 
 TêteD = SerpentD
@@ -479,10 +519,10 @@ CorpsG = CorpsSerpentG
 CorpsB = CorpsSerpentB
 fruit = Souris
 
-piège = pygame.image.load("cactus.png").convert_alpha()
+piège = pygame.image.load(dossier+"cactus.png").convert_alpha()
 piège = pygame.transform.scale(piège, (35,35))
 
-diamant = pygame.image.load("Diamant.png").convert_alpha()
+diamant = pygame.image.load(dossier+"Diamant.png").convert_alpha()
 diamant = pygame.transform.scale(diamant, (35,35))
 
 tp = 18 #Vitesse du jeu en mode moyen par défaut
@@ -510,7 +550,7 @@ pygame.display.flip()
 background_theme = pygame_menu.themes.THEME_BLUE
 menu = pygame_menu.Menu(
     height=640,
-    theme=pygame_menu.themes.THEME_BLUE,
+    theme=backgroung_theme,
     title='Snake',
     width=640
     )
@@ -518,19 +558,36 @@ skin_menu = pygame_menu.Menu(
     columns=2,
     height=640,
     onclose=pygame_menu.events.EXIT,
-    rows=3,
+    rows=4,
     theme=pygame_menu.themes.THEME_GREEN,
     title='Personnages',
     width=640
     )
    
-   
+skin_menu.add.label('Acheter avec de diamants ')   
 skin_menu.add.button('Serpent', set_the_skin,100)
 skin_menu.add.button('Canard', set_the_skin,200)
 skin_menu.add.button('Poule', set_the_skin,300)
+skin_menu.add.button('Retour au menu',run_menu)
 skin_menu.add.button('Mouton', set_the_skin,400)
 skin_menu.add.button('Girafe', set_the_skin,500)
 skin_menu.add.button('Ours', set_the_skin,600)
+
+menu_règles = pygame_menu.Menu(
+    height=640,
+    theme=pygame_menu.themes.THEME_BLUE,
+    title='Règles et commandes',
+    width=640
+    )
+
+menu_règles.add.label('En début de partie, appuyer sur la flèche')
+menu_règles.add.label('droite pour faire apparaïtre le serpent.')
+menu_règles.add.label('Pour changer de direction,')
+menu_règles.add.label('utiliser les flèches du clavier.')
+menu_règles.add.label('Il ne faut pas percuter les murs.')
+menu_règles.add.label('De même, attention aux cactus !')
+menu_règles.add.label('Choisissez un personnage et une vitesse.')
+menu_règles.add.button('Lancez-vous !', run_menu)
 
 police = pygame.font.SysFont('freesans', 50)
 
