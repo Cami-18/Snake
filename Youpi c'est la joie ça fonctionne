@@ -34,12 +34,12 @@ def run_menu():
     with open("scores_snake.txt", "r") as f:
         meilleur_score = f.readlines()[-1].rstrip()
         
-    path= os.getcwd() + '\reserve_diamants.txt'
+    path= os.getcwd() + '\diamants.txt'
     if not os.path.isfile(path) :
-        with open("reserve_diamants.txt",'w') as f:
+        with open("diamants.txt",'w') as f:
             f.write('_\n')
         
-    with open("reserve_diamants.txt", "r") as f:
+    with open("diamants.txt", "r") as f:
         reserve = f.readlines()[-1].rstrip()
         
     menu.add.label('Meilleur score: '+ meilleur_score)
@@ -70,7 +70,7 @@ def collision(x1,y1,x2,y2, size_snake, size_fruit):
         return False
 
 def start_the_game():
-    global fenetre, fruit,  Tete, Corps, couverture, bruit_collision, buit_mouvement, tp
+    global fenetre, fruit,  Tete, Corps, couverture, tp
     x = [0]
     y = [0]
     step = 23
@@ -221,8 +221,10 @@ def start_the_game():
 
         #Ajout du score à l'écran
         myfont = pygame.font.SysFont("monospace", 16)
-        score_display = myfont.render('Score: ' + str(score), True, BLANC)
+        score_display = myfont.render('Score: ' + str(score), True, NOIR)
+        diamant_display = myfont.render('Diamants: ' + str(nb_diamants_partie), True, NOIR)
         fenetre.blit(score_display, (500, 50))
+        fenetre.blit(diamant_display,(500,25))
         pygame.display.update()
         #Definition du meilleur score parmi les parties jouées
         if score > highscore:
@@ -239,9 +241,9 @@ def start_the_game():
         if previous_score == '_' or score > int(previous_score):
             f.write(str(score) + '\n')
             
-    with open("reserve_diamants.txt", "r") as f:
+    with open("diamants.txt", "r") as f:
         ancien_nb_diamant = f.readlines()[-1][:-1]
-    with open('reserve_diamants.txt' , 'a') as f:
+    with open('diamants.txt' , 'a') as f:
         if ancien_nb_diamant == '_' :
             f.write(str(nb_diamants_partie) + '\n')
         else :
