@@ -1,10 +1,7 @@
 #Importation des bibliothèques nécessaires
 from pygame.locals import *
 from random import randint
-import pygame
-import time
-import os
-import pygame_menu
+import pygame, time, os, pygame_menu
 from pygame_menu.examples import create_example_window
 from typing import Tuple, Any
 
@@ -127,8 +124,8 @@ def start_the_game():
     position_fruit.x = randint(2,10)*step
     position_fruit.y = randint(2,10)*step
     
-    position_diamant.x = randint(8,15)*step
-    position_diamant.y = randint(8,15)*step
+    position_diamant.x = ancien_position_diamant_x = randint(8,15)*step
+    position_diamant.y = ancien_position_diamant_y = randint(8,15)*step
     
     fenetre.blit(couverture,(0,0))
     
@@ -221,8 +218,12 @@ def start_the_game():
 
         #Chargement du fruit
         fenetre.blit(fruit, position_fruit)
-        fenetre.blit(diamant, position_diamant)
-
+        affichage = randint(0,100)
+        if (ancien_position_diamant_x == position_diamant.x and ancien_position_diamant_y == position_diamant.y) or affichage == 10:
+            fenetre.blit(diamant, position_diamant)
+            ancien_position_diamant_x = position_diamant.x 
+            ancien_position_diamant_y = position_diamant.y
+        
         #Verification de si le serpent touche un fruit
         if collision(x[0], y[0], position_fruit.x, position_fruit.y,35,25):
             position_fruit.x = randint(1,20)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
@@ -235,10 +236,14 @@ def start_the_game():
             score = score + 1
 
         if collision(x[0], y[0], position_diamant.x, position_diamant.y,35,25):
+            ancien_position_diamant_x= position_diamant.x
+            ancien_position_diamant_y = position_diamant.y
             position_diamant.x = randint(10,20)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
             position_diamant.y = randint(10,20)*step
             for j in range(0,length):
                 while collision(position_diamant.x, position_diamant.y, x[j], y[j],35,25):
+                    ancien_position_diamant_x= position_diamant.x
+                    ancien_position_diamant_y = position_diamant.y
                     position_diamant.x = randint(10,20)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
                     position_diamant.y = randint(10,20)*step
             nb_diamants_partie += 1
@@ -297,40 +302,40 @@ def start_the_game():
 pygame.init() #On initialise la bibliothèque pygame
 
 surface = create_example_window('Menu', (640, 640))
-
+dossier = os.getcwd() + "\Images à télécharger pour le jeu\\"
 #Chargement des bruitages du jeu
-bruit_mouvement = pygame.mixer.Sound("move.wav")
-bruit_collision = pygame.mixer.Sound("collision.wav")
+bruit_mouvement = pygame.mixer.Sound(dossier+"move.wav")
+bruit_collision = pygame.mixer.Sound(dossier+"collision.wav")
 
 #Chargement des images du jeu :
-Serpent = pygame.image.load("SerpentD.png").convert_alpha() #idem mais conserve la transparence de l'img
+Serpent = pygame.image.load(dossier+"SerpentD.png").convert_alpha() #idem mais conserve la transparence de l'img
 Serpent = pygame.transform.scale(Serpent,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
-CorpsSerpent = pygame.image.load("CorpsSerpentD.png").convert_alpha()
+CorpsSerpent = pygame.image.load(dossier+"CorpsSerpentD.png").convert_alpha()
 CorpsSerpent = pygame.transform.scale(CorpsSerpent,(25,25))
 
-Canard = pygame.image.load("CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
+Canard = pygame.image.load(dossier+"CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
 Canard = pygame.transform.scale(Canard,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
-Caneton = pygame.image.load("CanetonD.png").convert_alpha()
+Caneton = pygame.image.load(dossier+"CanetonD.png").convert_alpha()
 Caneton = pygame.transform.scale(Caneton,(25,25))
 
-Poule = pygame.image.load("PouleD.png").convert_alpha()
+Poule = pygame.image.load(dossier+"PouleD.png").convert_alpha()
 Poule = pygame.transform.scale(Poule,(35,35))
-Poussin = pygame.image.load("PoussinD.png").convert_alpha()
+Poussin = pygame.image.load(dossier+"PoussinD.png").convert_alpha()
 Poussin = pygame.transform.scale(Poussin,(25,25))
 
-Girafe = pygame.image.load("GirafeD.png").convert_alpha()
+Girafe = pygame.image.load(dossier+"GirafeD.png").convert_alpha()
 Girafe = pygame.transform.scale(Girafe,(35,35))
-CouGirafe = pygame.image.load("CouGirafeD.png").convert_alpha()
+CouGirafe = pygame.image.load(dossier+"CouGirafeD.png").convert_alpha()
 CouGirafe = pygame.transform.scale(CouGirafe,(25,25))
 
-Mouton = pygame.image.load("MoutonD.png").convert_alpha()
+Mouton = pygame.image.load(dossier+"MoutonD.png").convert_alpha()
 Mouton = pygame.transform.scale(Mouton,(35,35))
-Loup = pygame.image.load("LoupD.png").convert_alpha()
+Loup = pygame.image.load(dossier+"LoupD.png").convert_alpha()
 Loup = pygame.transform.scale(Loup,(25,25))
 
-Ours = pygame.image.load("OursD.png").convert_alpha()
+Ours = pygame.image.load(dossier+"OursD.png").convert_alpha()
 Ours = pygame.transform.scale(Ours,(35,35))
-Abeille = pygame.image.load("AbeilleD.png").convert_alpha()
+Abeille = pygame.image.load(dossier+"AbeilleD.png").convert_alpha()
 Abeille = pygame.transform.scale(Abeille,(25,25))
 
 Têtes = [Serpent, Canard, Poule, Mouton, Girafe, Ours]
