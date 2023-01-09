@@ -141,7 +141,7 @@ def set_the_skin(type):
         CorpsG = CouGirafeG
         CorpsB = CouGirafeB
         fruit= Baobab
-        if liste_perso[4]==0:
+        if liste_perso[4]=='0':
                 reserve -= 80
                 liste_perso = liste_perso[:4] + '1' + liste_perso[5]
     elif (reserve >=100 or liste_perso[5] =='1') :
