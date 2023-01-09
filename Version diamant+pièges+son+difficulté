@@ -60,8 +60,8 @@ def set_difficulty(selected: Tuple, value: Any) -> None:
     elif selected[0] == ('Ardue', 2):
         tp = 18
         ajout = 2
-    elif selected[0] == ('Très Ardue', 3) :
-        tp = 30
+    elif selected[0] == ('Très ardue', 3) :
+        tp = 28
         ajout = 2
 
 def gestion_son(selected: Tuple, value: Any) -> None:
