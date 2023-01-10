@@ -1,3 +1,4 @@
+'''Cette version ne fonctionne pas. Elle nous a seulement servi à tenter de comprendre le déplacement des images'''
 import pygame
 from pygame.locals import *
 from random import randint
