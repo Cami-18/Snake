@@ -5,13 +5,7 @@ import pygame,pygame_menu, time, os
 from pygame_menu.examples import create_example_window
 from typing import Tuple, Any
 
-#Couleurs pouvant être utiles :
-ROUGE = pygame.Color(210,45,60)
-BLANC = pygame.Color(255, 255, 255)
-BLEU = pygame.Color(0,0,139)
-JAUNE = pygame.Color(250,250,0)
 NOIR = pygame.Color(0,0,0)
-VERT = pygame.Color(60,215,60)
 
 #Liste des fonctions
 def run_menu():
@@ -22,7 +16,7 @@ def run_menu():
         title='Snake',
         width=l
         )
-    #Recherche du meilleur score (s'il existe) pour l'afficher
+    #Recherche du meilleur score (s'il existe) et de la réserve de diamants pour les afficher
     path= os.getcwd() + '\scores_snake.txt'
     if not os.path.isfile(path) :
         with open("scores_snake.txt",'w') as f:
@@ -143,7 +137,7 @@ def set_the_skin(type): #Permet de choisir un personnage
         f.write(liste_perso ) #On écrie la nouvelle liste dedans
     achat_confirmé(perso, depense)
     
-def achat_confirmé(perso, depense):
+def achat_confirmé(perso, depense): #ouvre une fenêtre pour confirmer l'achat s'il a eu lieu et le changement de personnage
     menu_perso_choisi = pygame_menu.Menu(
         height=630,
         theme=pygame_menu.themes.THEME_BLUE,
@@ -156,7 +150,7 @@ def achat_confirmé(perso, depense):
     menu_perso_choisi.add.button('Choisir un autre personnage', skin_menu )
     menu_perso_choisi.mainloop(surface)
     
-def message_erreur():
+def message_erreur(): #s'affiche lorsque le joueur essaie de choisir un personnage qu'il ne peut pas payer
     menu_erreur =  pygame_menu.Menu(
         height=440,
         theme=pygame_menu.themes.THEME_BLUE,
@@ -416,13 +410,13 @@ def start_the_game(): #Fonction principale : c'est la boucle de jeu
     # Pour mémoriser le fichier:                                                   
     # Ouvrir le fichier en mode écriture
     with open("scores_snake.txt", "r") as f:
-        previous_score = f.readlines()[-1][:-1]
+        previous_score = f.readlines()[-1].rstrip()
     with open('scores_snake.txt' , 'a') as f:
         if previous_score == '_' or score > int(previous_score):
             f.write(str(score) + '\n')
             
     with open("diamants.txt", "r") as f:
-        ancien_nb_diamant = f.readlines()[-1][:-1]
+        ancien_nb_diamant = f.readlines()[-1].rstrip()
     with open('diamants.txt' , 'a') as f:
             reserve = str(int(ancien_nb_diamant)+nb_diamants_partie)
             f.write( reserve + '\n')
