@@ -81,7 +81,8 @@ def set_the_skin(type):
     with open("Personnages.txt", "r") as f:
         liste_perso = f.read()
     reserve = int(reserve)
-        
+    depense = False
+    
     if type ==100:
         perso = 'Serpent'
         TêteD, TêteH, TêteG, TêteB = SerpentD, SerpentH, SerpentG, SerpentB
@@ -132,8 +133,8 @@ def set_the_skin(type):
             depense = True
             reserve -= 100
             liste_perso = liste_perso[:5] + '1'
-        else : #ce cas signifie que le joueur a chosi un personnage qu'il n'a pas encore acheté et qu'il ne peut pas encore payer 
-            message_erreur()
+    else : #ce cas signifie que le joueur a chosi un personnage qu'il n'a pas encore acheté et qu'il ne peut pas encore payer 
+        message_erreur()
     with open("diamants.txt", "a") as f:
         f.write(str(reserve) + '\n')
     with open("Personnages.txt", "w") as f: #on écrase le document précédent
