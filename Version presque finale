@@ -568,13 +568,13 @@ skin_menu = pygame_menu.Menu(
     )
    
 skin_menu.add.label('Acheter avec de diamants ')   
-skin_menu.add.button('Serpent', set_the_skin,100)
-skin_menu.add.button('Canard', set_the_skin,200)
-skin_menu.add.button('Poule', set_the_skin,300)
+skin_menu.add.button('Serpent (0)', set_the_skin,100)
+skin_menu.add.button('Canard (20)', set_the_skin,200)
+skin_menu.add.button('Poule (40)', set_the_skin,300)
 skin_menu.add.button('Retour au menu',run_menu)
-skin_menu.add.button('Mouton', set_the_skin,400)
-skin_menu.add.button('Girafe', set_the_skin,500)
-skin_menu.add.button('Ours', set_the_skin,600)
+skin_menu.add.button('Mouton (60)', set_the_skin,400)
+skin_menu.add.button('Girafe(80)', set_the_skin,500)
+skin_menu.add.button('Ours (100)', set_the_skin,600)
 
 menu_règles = pygame_menu.Menu(
     height=h,
