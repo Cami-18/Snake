@@ -13,7 +13,7 @@ def dessin_snake() :
         forme_cellule = pygame.Rect((cellule[0]*l_case, cellule[1]*h_case),(l_case,h_case)) #on crée la forme de la cellule
         pygame.draw.rect(fen, couleur_snake, forme_cellule) #on dessine une cellule du serpent
 
-def maj_snake(direction) :
+def maj_snake(direction) : #modifie la liste stockant les positions du snake et gère la rencontre avec un fruit
     global fruit
     dirX, dirY = direction
     #Pour le déplacement, on va supprimer la queue et créer une cellule devant la tête
@@ -72,13 +72,13 @@ while en_cours == True : #tant que le jeu est en cours,
             if event.key == pygame.K_DOWN and not direction == [0,-1] : #on va en bas si on n'est pas en haut
                 direction = [0,1]
                 
-    #Draw            
+    #Affichage            
     fen.fill(bg_color) #Ajout de la couleur sur la fenêtre
     dessin_snake()
     dessin_fruit()
     pygame.display.update()
 
-    #Update
+    #Mise à jour du nouveau snake 
     if maj_snake(direction) == False :
         print("Perdu !")
         en_cours = False
