@@ -353,7 +353,7 @@ def start_the_game():
             position_piège.x = randint(8,15)*step
             position_piège.y = randint(8,15)*step
             for j in range(0,length):
-                while collision(position_piège.x, position_piège.y, x[j], y[j],35,25):
+                while collision(position_piège.x, position_piège.y, x[j], y[j],0,0):
                     position_piège.x = randint(8,15)*step
                     position_piège.y = randint(8,15)*step
             compteur = 0
@@ -361,24 +361,24 @@ def start_the_game():
             affichage = False
 
         #Verification de si le serpent touche un fruit
-        if collision(x[0], y[0], position_fruit.x, position_fruit.y,25,35) :
+        if collision(x[0], y[0], position_fruit.x, position_fruit.y,0,0) :
             position_fruit.x = randint(8,15)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
             position_fruit.y = randint(8,15)*step
             for j in range(0,length):
-                while collision(position_fruit.x, position_fruit.y, x[j], y[j],35,25) or collision(position_fruit.x, position_fruit.y, position_diamant.x, position_diamant.y,35,35):
+                while collision(position_fruit.x, position_fruit.y, x[j], y[j],0,0) or collision(position_fruit.x, position_fruit.y, position_diamant.x, position_diamant.y,0,0):
                     position_fruit.x = randint(8,15)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
                     position_fruit.y = randint(8,15)*step
             length = length + ajout #la longueur augmente de ajout, variable qui varie selon la difficulté
             score = score + 1
         
         #Vérification si le serpent touche un diamant
-        if collision(x[0], y[0], position_diamant.x, position_diamant.y,25,35):
+        if collision(x[0], y[0], position_diamant.x, position_diamant.y,0,0):
             ancien_position_diamant_x= position_diamant.x
             ancien_position_diamant_y = position_diamant.y
             position_diamant.x = randint(8,15)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
             position_diamant.y = randint(8,15)*step
             for j in range(0,length):
-                while collision(position_diamant.x, position_diamant.y, x[j], y[j],35,25):
+                while collision(position_diamant.x, position_diamant.y, x[j], y[j],0,0):
                     ancien_position_diamant_x= position_diamant.x
                     ancien_position_diamant_y = position_diamant.y
                     position_diamant.x = randint(8,15)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
@@ -386,7 +386,7 @@ def start_the_game():
             nb_diamants_partie += 1
             
         #Vérification si le serpent touche le piège
-        if collision(x[0], y[0], position_piège.x, position_piège.y,25,35) and compteur != 150 and affichage :
+        if collision(x[0], y[0], position_piège.x, position_piège.y,0,0) and compteur != 150 and affichage :
             if son == True :
                 pygame.mixer.Sound.play(bruit_collision)
             continuer = False
