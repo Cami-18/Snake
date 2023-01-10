@@ -1,3 +1,4 @@
+'''Un menu a été ajouté à la version de base, ce qui permet de ne pas arriver directement sur un snake lorsqu'on lit le code.'''
 import pygame
 import pygame_menu
 from pygame_menu.examples import create_example_window
