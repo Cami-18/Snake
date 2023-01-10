@@ -1,3 +1,4 @@
+'''Dans cette version, il y a un menu et le score s'affiche. Une tentative de créer des diamants et une réserve de diamants a été faite.'''
 import pygame, os
 import pygame_menu
 import pygame.image
