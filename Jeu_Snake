@@ -597,7 +597,6 @@ menu_règles.add.label('De même, attention aux cactus !')
 menu_règles.add.label('Choisissez un personnage et une vitesse.')
 menu_règles.add.button('Lancez-vous !', run_menu)
 
-police = pygame.font.SysFont('freesans', 50)
 
 #On lance le menu
 run_menu()
