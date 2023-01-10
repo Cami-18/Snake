@@ -1,3 +1,6 @@
+'''Dans cette versione, le snake fonctionne, les images tournent en même temps que le snake.
+La réserve de diamants, le meilleur score et le score s'affiche. On peut choisir la difficulté (vitesse, augmentation de la taille 
+du snake par fruit mangé), le son (on/off) et le choix des personnages et en cours de programmation.'''
 #Importation des bibliothèques nécessaires
 from pygame.locals import *
 from random import randint
