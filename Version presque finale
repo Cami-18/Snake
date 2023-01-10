@@ -88,7 +88,7 @@ def set_the_skin(type):
         CorpsD, CorpsH, CorpsG, CorpsB = CorpsSerpentD, CorpsSerpentH, CorpsSerpentG, CorpsSerpentB
         fruit = Souris
     elif type ==200 and (reserve>= 20 or liste_perso[1]=='1'):
-         perso = 'Canard'
+        perso = 'Canard'
         TêteD, TêteH, TêteG, TêteB = CanardD, CanardH, CanardG, CanardB
         CorpsD, CorpsH, CorpsG, CorpsB = CanetonD, CanetonH, CanetonG, CanetonB
         fruit = Pain
