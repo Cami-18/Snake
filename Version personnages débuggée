@@ -1,3 +1,6 @@
+'''Dans cette version, les images composant le snake ne tournent pas et le choix des personnages est en cours de création.
+On peut choisir la vitesse (rapide ou lente). Les diamants apparaissent correctement et aléatoirement.'''
+
 #Importation des bibliothèques nécessaires
 from pygame.locals import *
 from random import randint
