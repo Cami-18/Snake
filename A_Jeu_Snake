@@ -335,7 +335,7 @@ def start_the_game(): #Fonction principale : c'est la boucle de jeu
             ancien_position_diamant_x = position_diamant.x 
             ancien_position_diamant_y = position_diamant.y
 
-        #Apparition et disparition des pièges
+                #Apparition et disparition des pièges
         #L'idée est de faire apparaître de temps en temps des pèges à un endroit aléatoire
         if compteur < tps_ecran and attente == 0:
             #On laisse le piège sur l'écran pendant un certain nombre de boucle (tps_ecran)
@@ -355,41 +355,48 @@ def start_the_game(): #Fonction principale : c'est la boucle de jeu
                     position_piège.x = randint(8,15)*step
                     position_piège.y = randint(8,15)*step
             compteur = 0
+            #Le piège ne se réaffichera que lorsque attente sera revenu à 0
             attente = tps_chill
             affichage = False
 
         #Verification de si le serpent touche un fruit
         if collision(x[0], y[0], position_fruit.x, position_fruit.y) :
-            position_fruit.x = randint(8,15)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
+            #Si le fruit a été mangé, on le fait réapparaître à une position aléatoire
+            position_fruit.x = randint(8,15)*step   
             position_fruit.y = randint(8,15)*step
             for j in range(0,length):
+                #On vérifie que le fruit n'apparaît pas dans le Snake
                 while collision(position_fruit.x, position_fruit.y, x[j], y[j]) or collision(position_fruit.x, position_fruit.y, position_diamant.x, position_diamant.y):
-                    position_fruit.x = randint(8,15)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
+                    position_fruit.x = randint(8,15)*step
                     position_fruit.y = randint(8,15)*step
-            length = length + ajout #la longueur augmente de ajout, variable qui varie selon la difficulté
+            #la longueur augmente de ajout, variable qui varie selon la difficulté
+            length = length + ajout 
             score = score + 1
         
-        #Vérification si le serpent touche un diamant
+        #Vérification de si le serpent touche un diamant
         if collision(x[0], y[0], position_diamant.x, position_diamant.y):
             ancien_position_diamant_x= position_diamant.x
             ancien_position_diamant_y = position_diamant.y
-            position_diamant.x = randint(8,15)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
+            position_diamant.x = randint(8,15)*step  
             position_diamant.y = randint(8,15)*step
             for j in range(0,length):
+                #On vérifie que le diamant n'apparaît pas dans le Snake
                 while collision(position_diamant.x, position_diamant.y, x[j], y[j]):
                     ancien_position_diamant_x= position_diamant.x
                     ancien_position_diamant_y = position_diamant.y
-                    position_diamant.x = randint(8,15)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
+                    position_diamant.x = randint(8,15)*step   
                     position_diamant.y = randint(8,15)*step
             nb_diamants_partie += 1
             
-        #Vérification si le serpent touche le piège
+        #Vérification de si le serpent touche le piège
+        #Le joueur perd s'il touche le piège
         if collision(x[0], y[0], position_piège.x, position_piège.y) and compteur != 150 and affichage :
             if son == True :
                 pygame.mixer.Sound.play(bruit_collision)
             continuer = False
 
-        #Vérification de si la tête du serpent touche un morceau du corps
+        #Vérification de si la tête du serpent touche une des parties du corps
+        #Le joueur perd si le Snake se traverse
         for i in range (1, length) :
             if collision(x[0], y[0], x[i], y[i]) and move_init:
                 if son == True :
@@ -400,28 +407,32 @@ def start_the_game(): #Fonction principale : c'est la boucle de jeu
         myfont = pygame.font.SysFont("monospace", 16)
         score_display = myfont.render('Score: ' + str(score), True, NOIR)
         diamant_display = myfont.render('Diamants: ' + str(nb_diamants_partie), True, NOIR)
-        fenetre.blit(score_display, (500, 50))
+        #On fait apparaître le score et le nombre de diamants récoltés en haut à droite de l'écran
+        fenetre.blit(score_display, (500, 50)) 
         fenetre.blit(diamant_display,(500,25))
         pygame.display.update()
 
-        #Ajout d'un retard à la boucle pour obtenir la tp de déplacement voulue
-        pygame.time.Clock().tick(tp) #ne fait la boucle que toutes les laps de temps donnés
+        #On ne fait la boucle que tous les laps de temps donné
+        #Le laps de temps varie selon la variable tp, qui change selon la difficulté choisie
+        pygame.time.Clock().tick(tp) 
 
     # Pour mémoriser le fichier:                                                   
     # Ouvrir le fichier en mode écriture
     with open("scores_snake.txt", "r") as f:
-        previous_score = f.readlines()[-1].rstrip()
+        previous_score = f.readlines()[-1][:-1]
     with open('scores_snake.txt' , 'a') as f:
+        #On modifie l'ancien document pour éventuellement y mettre le meilleur score
         if previous_score == '_' or score > int(previous_score):
             f.write(str(score) + '\n')
-            
+    #On modifie le document correspondant à la réserve de diamants pour y ajouter les
+    #diamants récupérés sur cette partie
     with open("diamants.txt", "r") as f:
-        ancien_nb_diamant = f.readlines()[-1].rstrip()
+        ancien_nb_diamant = f.readlines()[-1][:-1]
     with open('diamants.txt' , 'a') as f:
             reserve = str(int(ancien_nb_diamant)+nb_diamants_partie)
             f.write( reserve + '\n')
         
-    #Menu game over
+    #Menu game over, qui s'affiche quand le joueur perd
     menu_game_over = pygame_menu.Menu(
         height=550,
         theme=pygame_menu.themes.THEME_BLUE,
@@ -436,7 +447,6 @@ def start_the_game(): #Fonction principale : c'est la boucle de jeu
 
 
 pygame.init() #On initialise la bibliothèque pygame
-
 surface = create_example_window('Menu', (640, 640))
 dossier = os.getcwd() + "\Images à télécharger pour le jeu\\"
 
@@ -445,8 +455,9 @@ bruit_mouvement = pygame.mixer.Sound(dossier+"move.wav")
 bruit_collision = pygame.mixer.Sound(dossier+"collision.wav")
 
 #Chargement des images du jeu :
-SerpentD = pygame.image.load(dossier+"SerpentD.png").convert_alpha() #idem mais conserve la transparence de l'img
-SerpentD = pygame.transform.scale(SerpentD,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
+#Les personnages et leur fruit associé:
+SerpentD = pygame.image.load(dossier+"SerpentD.png").convert_alpha() #On convertit l'image en conservant la transparence de l'image
+SerpentD = pygame.transform.scale(SerpentD,(35,35)) #On modifie la taille (et les proportions) de l'img en 35x35 pixels
 SerpentH = pygame.transform.rotate(SerpentD, 90)
 SerpentG = pygame.transform.rotate(SerpentH, 90)
 SerpentB = pygame.transform.rotate(SerpentG, 90)
@@ -455,11 +466,11 @@ CorpsSerpentD = pygame.transform.scale(CorpsSerpentD,(35,35))
 CorpsSerpentH = pygame.transform.rotate(CorpsSerpentD, 90)
 CorpsSerpentG = pygame.transform.rotate(CorpsSerpentH, 90)
 CorpsSerpentB = pygame.transform.rotate(CorpsSerpentG, 90)
-Souris = pygame.image.load(dossier+"Souris.png").convert_alpha() #idem mais conserve la transparence de l'img
+Souris = pygame.image.load(dossier+"Souris.png").convert_alpha() 
 Souris = pygame.transform.scale(Souris,(35,35))
 
-CanardD = pygame.image.load(dossier+"CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
-CanardD = pygame.transform.scale(CanardD,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
+CanardD = pygame.image.load(dossier+"CanardD.png").convert_alpha() 
+CanardD = pygame.transform.scale(CanardD,(35,35)) 
 CanardH = pygame.transform.rotate(CanardD, 90)
 CanardG = pygame.transform.rotate(CanardH, 90)
 CanardB = pygame.transform.rotate(CanardG, 90)
@@ -468,9 +479,8 @@ CanetonD = pygame.transform.scale(CanetonD,(35,35))
 CanetonH = pygame.transform.rotate(CanetonD, 90)
 CanetonG = pygame.transform.rotate(CanetonH, 90)
 CanetonB = pygame.transform.rotate(CanetonG, 90)
-Pain = pygame.image.load(dossier+"Pain.png").convert_alpha() #idem mais conserve la transparence de l'img
+Pain = pygame.image.load(dossier+"Pain.png").convert_alpha() 
 Pain = pygame.transform.scale(Pain,(35,35))
-
 
 PouleD = pygame.image.load(dossier+"PouleD.png").convert_alpha()
 PouleD = pygame.transform.scale(PouleD,(35,35))
@@ -482,7 +492,7 @@ PoussinD = pygame.transform.scale(PoussinD,(35,35))
 PoussinH = pygame.transform.rotate(PoussinD, 90)
 PoussinG = pygame.transform.rotate(PoussinH, 90)
 PoussinB = pygame.transform.rotate(PoussinG, 90)
-Asticot = pygame.image.load(dossier+"Asticot.png").convert_alpha() #idem mais conserve la transparence de l'img
+Asticot = pygame.image.load(dossier+"Asticot.png").convert_alpha() 
 Asticot = pygame.transform.scale(Asticot,(35,35))
 
 GirafeD = pygame.image.load(dossier+"GirafeD.png").convert_alpha()
@@ -495,7 +505,7 @@ CouGirafeD = pygame.transform.scale(CouGirafeD,(35,35))
 CouGirafeH = pygame.transform.rotate(CouGirafeD, 90)
 CouGirafeG = pygame.transform.rotate(CouGirafeH, 90)
 CouGirafeB = pygame.transform.rotate(CouGirafeG, 90)
-Baobab = pygame.image.load(dossier+"Baobab.png").convert_alpha() #idem mais conserve la transparence de l'img
+Baobab = pygame.image.load(dossier+"Baobab.png").convert_alpha() 
 Baobab = pygame.transform.scale(Baobab,(35,35))
 
 MoutonD = pygame.image.load(dossier+"MoutonD.png").convert_alpha()
@@ -508,7 +518,7 @@ LoupD = pygame.transform.scale(LoupD,(35,35))
 LoupH = pygame.transform.rotate(LoupD, 90)
 LoupG = pygame.transform.rotate(LoupH, 90)
 LoupB = pygame.transform.rotate(LoupG, 90)
-TouffeHerbe = pygame.image.load(dossier+"TouffeHerbe.png").convert_alpha() #idem mais conserve la transparence de l'img
+TouffeHerbe = pygame.image.load(dossier+"TouffeHerbe.png").convert_alpha() 
 TouffeHerbe = pygame.transform.scale(TouffeHerbe,(35,35))
 
 OursD = pygame.image.load(dossier+"OursD.png").convert_alpha()
@@ -521,33 +531,38 @@ AbeilleD = pygame.transform.scale(AbeilleD,(35,35))
 AbeilleH = pygame.transform.rotate(AbeilleD, 90)
 AbeilleG = pygame.transform.rotate(AbeilleH, 90)
 AbeilleB = pygame.transform.rotate(AbeilleG, 90)
-PotDeMiel = pygame.image.load(dossier+"PotDeMiel.png").convert_alpha() #idem mais conserve la transparence de l'img
+PotDeMiel = pygame.image.load(dossier+"PotDeMiel.png").convert_alpha() 
 PotDeMiel = pygame.transform.scale(PotDeMiel,(35,35))
 
+#Le piège
+piège = pygame.image.load(dossier+"cactus.png").convert_alpha()
+piège = pygame.transform.scale(piège, (35,35))
+
+#Le diamant
+diamant = pygame.image.load(dossier+"Diamant.png").convert_alpha()
+diamant = pygame.transform.scale(diamant, (35,35))
+
+#On initialise le jeu avec le personnage Serpent
 TêteD, TêteH, TêteG, TêteB = SerpentD, SerpentH, SerpentG, SerpentB
 CorpsD, CorpsH, CorpsG, CorpsB = CorpsSerpentD, CorpsSerpentH, CorpsSerpentG, CorpsSerpentB
 fruit = Souris
 
-piège = pygame.image.load(dossier+"cactus.png").convert_alpha()
-piège = pygame.transform.scale(piège, (35,35))
-
-diamant = pygame.image.load(dossier+"Diamant.png").convert_alpha()
-diamant = pygame.transform.scale(diamant, (35,35))
-
-tp = 18 #Vitesse du jeu en mode moyen par défaut
+#On initialise la difficulté du jeu en "Difficulté moyenne"
+tp = 18 
 ajout = 1
 tps_chill = 200
 tps_ecran = 125
 
-son = True #Quand le jeu commence, le son est activé
+#Quand le jeu commence, le son est activé
+son = True 
 
 #Création de la fenêtre :
 l = 630 #largeur de la fenêtre
 h = 630 #hauteur de la fenêtre
 fenetre = pygame.display.set_mode((l,h)) #création de la fenêtre
-fenetre_rect = fenetre.get_rect()
-couverture =  pygame.image.load(dossier+"fond_simple.png").convert() #Fond
-couverture = pygame.transform.scale(couverture,fenetre.get_size()) #On adapte l'img de fond à la taille de la fenetre
+fenetre_rect = fenetre.get_rect() #On récupère les positions de la fenêtre
+couverture =  pygame.image.load(dossier+"fond_simple.png").convert() #Image pour le fond
+couverture = pygame.transform.scale(couverture,fenetre.get_size()) #On adapte l'image de fond à la taille de la fenêtre
 fenetre.blit(couverture,(0,0))
 pygame.display.set_caption("Snake") #On nomme la fenêtre de jeu
 
