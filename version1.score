@@ -1,3 +1,4 @@
+'''Dans cette version, le snake est une suite de cubes verts et le fruit un cube rouge. Le score est stocké.'''
 import pygame
 from random import randint
 # initialisation du score
