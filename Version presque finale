@@ -80,60 +80,85 @@ def set_the_skin(type):
         
     with open("Personnages.txt", "r") as f:
         liste_perso = f.read()
-        reserve = int(reserve)
+    reserve = int(reserve)
         
     if type ==100:
+        perso = 'Serpent'
         TêteD, TêteH, TêteG, TêteB = SerpentD, SerpentH, SerpentG, SerpentB
         CorpsD, CorpsH, CorpsG, CorpsB = CorpsSerpentD, CorpsSerpentH, CorpsSerpentG, CorpsSerpentB
         fruit = Souris
     elif type ==200 and (reserve>= 20 or liste_perso[1]=='1'):
+         perso = 'Canard'
         TêteD, TêteH, TêteG, TêteB = CanardD, CanardH, CanardG, CanardB
         CorpsD, CorpsH, CorpsG, CorpsB = CanetonD, CanetonH, CanetonG, CanetonB
         fruit = Pain
         if liste_perso[1]=='0':
-                reserve -= 20
-                liste_perso = liste_perso[0] + '1' + liste_perso[2:]
+            depense = True
+            reserve -= 20
+            liste_perso = liste_perso[0] + '1' + liste_perso[2:]
     elif type == 300 and (reserve >= 40 or liste_perso[2] == '1'):
+        perso = 'Poule'
         TêteD, TêteH, TêteG, TêteB = PouleD, PouleH, PouleG, PouleB
         CorpsD, CorpsH, CorpsG, CorpsB = PoussinD, PoussinH, PoussinG, PoussinB
         fruit = Asticot
         if liste_perso[2]=='0':
-                reserve -= 40
-                liste_perso = liste_perso[:1] + '1' + liste_perso[3:]
+            depense = True
+            reserve -= 40
+            liste_perso = liste_perso[:1] + '1' + liste_perso[3:]
     elif type == 400 and (reserve >= 60 or liste_perso[3] =='1'):
+        perso ='Mouton'
         TêteD, TêteH, TêteG, TêteB = MoutonD, MoutonH, MoutonG, MoutonB
         CorpsD, CorpsH, CorpsG, CorpsB = LoupD, LoupH, LoupG, LoupB
         fruit = TouffeHerbe
         if liste_perso[3]=='0':
-                reserve -= 60
-                liste_perso = liste_perso[:3] + '1' + liste_perso[4:]
+            depense = True
+            reserve -= 60
+            liste_perso = liste_perso[:3] + '1' + liste_perso[4:]
     elif type == 500 and (reserve >= 80 or liste_perso[4] =='1'):
+        perso = 'Girafe'
         TêteD, TêteH, TêteG, TêteB = GirafeD, GirafeH, GirafeG, GirafeB
         CorpsD, CorpsH, CorpsG, CorpsB = CouGirafeD, CouGirafeH, CouGirafeG, CouGirafeB
         fruit= Baobab
         if liste_perso[4]=='0':
-                reserve -= 80
-                liste_perso = liste_perso[:4] + '1' + liste_perso[5]
+            depense = True
+            reserve -= 80
+            liste_perso = liste_perso[:4] + '1' + liste_perso[5]
     elif type == 600 and (reserve >=100 or liste_perso[5] =='1') :
+        perso= 'Ours'
         TêteD, TêteH, TêteG, TêteB = OursD, OursH, OursG, OursB
         CorpsD, CorpsH, CorpsG, CorpsB = AbeilleD, AbeilleH, AbeilleG, AbeilleB
         fruit = PotDeMiel
         if liste_perso[5]=='0':
-                reserve -= 100
-                liste_perso = liste_perso[:5] + '1'
+            depense = True
+            reserve -= 100
+            liste_perso = liste_perso[:5] + '1'
         else : #ce cas signifie que le joueur a chosi un personnage qu'il n'a pas encore acheté et qu'il ne peut pas encore payer 
             message_erreur()
     with open("diamants.txt", "a") as f:
         f.write(str(reserve) + '\n')
     with open("Personnages.txt", "w") as f: #on écrase le document précédent
         f.write(liste_perso )
-
+    achat_confirmé(perso, depense)
+    
+def achat_confirmé(perso, depense):
+    menu_perso_choisi = pygame_menu.Menu(
+        height=630,
+        theme=pygame_menu.themes.THEME_BLUE,
+        title='Personnage choisi',
+        width=630
+        )
+    if depense:
+        menu_perso_choisi.add.label('Vous avez acheté le personnage '+ perso)
+    menu_perso_choisi.add.button('Jouer avec le personnage '+ perso ,start_the_game)
+    menu_perso_choisi.add.button('Choisir un autre personnage', skin_menu )
+    menu_perso_choisi.mainloop(surface)
+    
 def message_erreur():
     menu_erreur =  pygame_menu.Menu(
         height=440,
         theme=pygame_menu.themes.THEME_BLUE,
         title='Dommage !',
-        width=640
+        width=630
         )
     menu_erreur.add.label("Vous n'avez pas assez de diamants")
     menu_erreur.add.button("Jouer pour en récolter", start_the_game)
