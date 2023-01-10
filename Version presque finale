@@ -50,19 +50,27 @@ def run_menu():
     menu.mainloop(surface)
     
 def set_difficulty(selected: Tuple, value: Any) -> None:
-    global tp, ajout
+    global tp, ajout, tps_chill, tps_ecran
     if selected[0] == ('Facile', 4):
         tp = 12
         ajout = 1
+        tps_chill = 300
+        tps_ecran = 60
     elif selected[0] == ('Moyenne', 1):
         tp = 18
         ajout = 1
+        tps_chill = 200
+        tps_ecran = 125
     elif selected[0] == ('Ardue', 2):
         tp = 18
         ajout = 2
+        tps_chill = 125
+        tps_ecran = 200
     elif selected[0] == ('Très ardue', 3) :
         tp = 28
         ajout = 2
+        tps_chill = 60
+        tps_ecran = 300
 
 def gestion_son(selected: Tuple, value: Any) -> None:
     global son
@@ -174,7 +182,7 @@ def collision(x1,y1,x2,y2, size_snake, size_fruit):
         return False
 
 def start_the_game():
-    global fenetre, fruit,  Tete, Corps, couverture, tp
+    global fenetre, fruit,  Tete, Corps, couverture, tp, ajout, tps_ecran, tps_chill
     x = [0]
     y = [0]
     step = 35
@@ -332,7 +340,7 @@ def start_the_game():
             ancien_position_diamant_y = position_diamant.y
 
         #Apparition et disparition des pièges    
-        if compteur < 150 and attente == 0:
+        if compteur < tps_ecran and attente == 0:
             fenetre.blit(piège, position_piège)
             compteur += 1
             affichage = True
@@ -341,7 +349,7 @@ def start_the_game():
             attente -= 1
             affichage = False
         
-        if compteur == 150 :
+        if compteur == tps_ecran :
             position_piège.x = randint(8,15)*step
             position_piège.y = randint(8,15)*step
             for j in range(0,length):
@@ -349,7 +357,7 @@ def start_the_game():
                     position_piège.x = randint(8,15)*step
                     position_piège.y = randint(8,15)*step
             compteur = 0
-            attente = 150
+            attente = tps_chill
             affichage = False
 
         #Verification de si le serpent touche un fruit
@@ -533,6 +541,8 @@ diamant = pygame.transform.scale(diamant, (35,35))
 
 tp = 18 #Vitesse du jeu en mode moyen par défaut
 ajout = 1
+tps_chill = 200
+tps_ecran = 125
 
 son = True #Quand le jeu commence, le son est activé
 
