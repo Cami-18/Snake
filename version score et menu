@@ -1,3 +1,6 @@
+'''Dans cette version, le score s'affiche et le lancement du programme nous conduit à un menu permettant de voir le meilleur score enregistré.
+Le but final est que le menu permette de régler le son, la difficulté, le choix des personnages et d'afficher le meilleur score, le score et 
+l'explication des règles.'''
 import pygame, os
 import pygame_menu
 from pygame_menu.examples import create_example_window
