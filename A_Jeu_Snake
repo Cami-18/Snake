@@ -351,7 +351,7 @@ def start_the_game(): #Fonction principale : c'est la boucle de jeu
             position_piège.x = randint(8,15)*step 
             position_piège.y = randint(8,15)*step
             for j in range(0,length): #On vérifie que le piège n'apparaît pas dans le Snake
-                while collision(position_piège.x, position_piège.y, x[j], y[j]):
+                while collision(position_piège.x, position_piège.y, x[j], y[j]) or collision(position_piège.x, position_piège.y, position_diamant.x, position_diamant.y) or collision(position_piège.x, position_piège.y, position_fruit.x, position_fruit.y):
                     position_piège.x = randint(8,15)*step
                     position_piège.y = randint(8,15)*step
             compteur = 0
@@ -604,7 +604,7 @@ menu_règles = pygame_menu.Menu(
     )
 
 menu_règles.add.label('En début de partie, appuyer sur la flèche')
-menu_règles.add.label('droite pour faire apparaïtre le serpent.')
+menu_règles.add.label('droite pour faire apparaître le serpent.')
 menu_règles.add.label('Pour changer de direction,')
 menu_règles.add.label('utiliser les flèches du clavier.')
 menu_règles.add.label('Il ne faut pas percuter les murs.')
