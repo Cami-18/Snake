@@ -1,0 +1,609 @@
+#Importation des bibliothèques nécessaires
+from pygame.locals import *
+from random import randint
+import pygame,pygame_menu, time, os
+from pygame_menu.examples import create_example_window
+from typing import Tuple, Any
+
+#Couleurs pouvant être utiles :
+ROUGE = pygame.Color(210,45,60)
+BLANC = pygame.Color(255, 255, 255)
+BLEU = pygame.Color(0,0,139)
+JAUNE = pygame.Color(250,250,0)
+NOIR = pygame.Color(0,0,0)
+VERT = pygame.Color(60,215,60)
+
+#Liste des fonctions
+def run_menu():
+    global menu, reserve
+    menu = pygame_menu.Menu(
+        height=h,
+        theme=background_theme,
+        title='Snake',
+        width=l
+        )
+    #Recherche du meilleur score (s'il existe) pour l'afficher
+    path= os.getcwd() + '\scores_snake.txt'
+    if not os.path.isfile(path) :
+        with open("scores_snake.txt",'w') as f:
+            f.write('_\n')
+        
+    with open("scores_snake.txt", "r") as f:
+        meilleur_score = f.readlines()[-1].rstrip()
+        
+    path= os.getcwd() + '\diamants.txt'
+    if not os.path.isfile(path) :
+        with open("diamants.txt",'w') as f:
+            f.write('0\n')
+        
+    with open("diamants.txt", "r") as f:
+        reserve = f.readlines()[-1].rstrip()
+        
+    menu.add.label('Meilleur score: '+ meilleur_score)
+    menu.add.label('Diamants: '+ reserve)
+    menu.add.button('Personnage',skin_menu)
+    menu.add.selector('Difficulté : ', [('Moyenne', 1), ('Ardue', 2), ('Très ardue', 3), ('Facile',4)], onchange=set_difficulty)
+    menu.add.button('Jouer', start_the_game)
+    menu.add.button('Quitter', pygame_menu.events.EXIT)
+    menu.add.button('Règles et commandes', menu_règles)
+    menu.add.selector('Son : ', [('On', 1), ('Off', 2)], onchange=gestion_son)
+    menu.mainloop(surface)
+    
+def set_difficulty(selected: Tuple, value: Any) -> None:
+    #Permet de régler la difficulté :
+    #Fait varier la vitesse du Snake (tp), le nombre de parties du corps 
+    #qui s'ajoute à chaque fruit mangé (ajout), la fréquence d'apparition 
+    #du piège (tps_chill) et le temps d'apparition du piège (tps_ecran)
+    global tp, ajout, tps_chill, tps_ecran
+    if selected[0] == ('Facile', 4):
+        tp, ajout, tps_chill, tps_ecran = 12, 1, 300, 60
+    elif selected[0] == ('Moyenne', 1):
+        tp, ajout, tps_chill, tps_ecran = 18, 1, 200, 125
+    elif selected[0] == ('Ardue', 2):
+        tp, ajout, tps_chill, tps_ecran = 24, 2, 125, 200
+    elif selected[0] == ('Très ardue', 3) :
+        tp, ajout, tps_chill, tps_ecran = 28, 2, 60, 300
+
+def gestion_son(selected: Tuple, value: Any) -> None:
+    #Permet au joueur d'activer ou de désactiver le son
+    global son
+    if selected[0] == ('On', 1) :
+        son = True
+    else :
+        son = False
+
+def set_the_skin(type): #Permet de choisir un personnage
+    global TêteD, TêteG, TêteH, TêteB, CorpsD, CorpsG, CorpsH, CorpsB, fruit, reserve
+    path= os.getcwd() + '\Personnages.txt'
+    if not os.path.isfile(path) :
+        with open("Personnages.txt",'w') as f:
+            f.write('100000') #par défaut, le joueur ne peut utiliser que le serpent,  
+   #d'où le 1 dans la première position, et les 0 dans les autres     
+    with open("Personnages.txt", "r") as f:
+        liste_perso = f.read()
+    reserve = int(reserve)
+    depense = False
+    
+    if type ==100: #Le Serpent
+        perso = 'Serpent'
+        TêteD, TêteH, TêteG, TêteB = SerpentD, SerpentH, SerpentG, SerpentB
+        CorpsD, CorpsH, CorpsG, CorpsB = CorpsSerpentD, CorpsSerpentH, CorpsSerpentG, CorpsSerpentB
+        fruit = Souris
+    elif type ==200 and (reserve>= 20 or liste_perso[1]=='1'): #Le Canard
+        perso = 'Canard'
+        TêteD, TêteH, TêteG, TêteB = CanardD, CanardH, CanardG, CanardB
+        CorpsD, CorpsH, CorpsG, CorpsB = CanetonD, CanetonH, CanetonG, CanetonB
+        fruit = Pain
+        if liste_perso[1]=='0': #Pour savoir si l'on possède ou non le personnage
+            depense = True
+            reserve -= 20 #Le Canard coûte 20 diamants
+            liste_perso = liste_perso[0] + '1' + liste_perso[2:] #enregistre l'achat dans le fichier
+    elif type == 300 and (reserve >= 40 or liste_perso[2] == '1'): #La Poule
+        perso = 'Poule'
+        TêteD, TêteH, TêteG, TêteB = PouleD, PouleH, PouleG, PouleB
+        CorpsD, CorpsH, CorpsG, CorpsB = PoussinD, PoussinH, PoussinG, PoussinB
+        fruit = Asticot
+        if liste_perso[2]=='0':
+            depense = True
+            reserve -= 40
+            liste_perso = liste_perso[:2] + '1' + liste_perso[3:]
+    elif type == 400 and (reserve >= 60 or liste_perso[3] =='1'): #Le Mouton
+        perso ='Mouton'
+        TêteD, TêteH, TêteG, TêteB = MoutonD, MoutonH, MoutonG, MoutonB
+        CorpsD, CorpsH, CorpsG, CorpsB = LoupD, LoupH, LoupG, LoupB
+        fruit = TouffeHerbe 
+        if liste_perso[3]=='0':
+            depense = True
+            reserve -= 60
+            liste_perso = liste_perso[:3] + '1' + liste_perso[4:]
+    elif type == 500 and (reserve >= 80 or liste_perso[4] =='1'): #La Girafe
+        perso = 'Girafe'
+        TêteD, TêteH, TêteG, TêteB = GirafeD, GirafeH, GirafeG, GirafeB
+        CorpsD, CorpsH, CorpsG, CorpsB = CouGirafeD, CouGirafeH, CouGirafeG, CouGirafeB
+        fruit= Baobab
+        if liste_perso[4]=='0':
+            depense = True
+            reserve -= 80
+            liste_perso = liste_perso[:4] + '1' + liste_perso[5]
+    elif type == 600 and (reserve >=100 or liste_perso[5] =='1') : #L'ours
+        perso= 'Ours'
+        TêteD, TêteH, TêteG, TêteB = OursD, OursH, OursG, OursB
+        CorpsD, CorpsH, CorpsG, CorpsB = AbeilleD, AbeilleH, AbeilleG, AbeilleB
+        fruit = PotDeMiel
+        if liste_perso[5]=='0':
+            depense = True
+            reserve -= 100
+            liste_perso = liste_perso[:5] + '1'
+    else : #ce cas signifie que le joueur a choisi un personnage qu'il n'a pas encore acheté
+#et qu'il n'a pas les moyens de se le procurer 
+        message_erreur()
+    with open("diamants.txt", "a") as f: #Enregistre la réserve de diamants après l'achat
+        f.write(str(reserve) + '\n')
+    with open("Personnages.txt", "w") as f: #On écrase le document précédent
+        f.write(liste_perso ) #On écrie la nouvelle liste dedans
+    achat_confirmé(perso, depense)
+    
+def achat_confirmé(perso, depense):
+    menu_perso_choisi = pygame_menu.Menu(
+        height=630,
+        theme=pygame_menu.themes.THEME_BLUE,
+        title='Personnage choisi',
+        width=630
+        )
+    if depense:
+        menu_perso_choisi.add.label('Vous avez acheté le personnage '+ perso)
+    menu_perso_choisi.add.button('Jouer avec le personnage '+ perso ,start_the_game)
+    menu_perso_choisi.add.button('Choisir un autre personnage', skin_menu )
+    menu_perso_choisi.mainloop(surface)
+    
+def message_erreur():
+    menu_erreur =  pygame_menu.Menu(
+        height=440,
+        theme=pygame_menu.themes.THEME_BLUE,
+        title='Dommage !',
+        width=630
+        )
+    menu_erreur.add.label("Vous n'avez pas assez de diamants")
+    menu_erreur.add.button("Jouer pour en récolter", start_the_game)
+    menu_erreur.add.button('Choisir un autre personnage', skin_menu)
+    menu_erreur.mainloop(surface) 
+
+def collision(x1,y1,x2,y2): #Pour savoir s'il y a collision entre deux images
+    if (x1 == x2) and (y1 == y2): #Vérifie simplement si deux images ont les mêmes coordonnées
+        return True
+    return False
+
+def start_the_game(): #Fonction principale : c'est la boucle de jeu
+    #La boucle principale est dans une fonction car les boutons pygame appellent des fonctions
+    #et que nous avions besoin que le bouton Jouer lance le jeu
+    global fenetre, fruit,  Tete, Corps, couverture, tp, ajout, tps_ecran, tps_chill
+    x = [0] #Création de la liste des abscisses des parties du serpent
+    y = [0] #Création de la liste des ordonnées des parties du serpent
+    step = 35 #Pas du Snake, permettant de créer un quadrillage du jeu
+    #Variables utiles pour l'apparition des pièges
+    compteur = 0 #Au départ, il n'y a pas de piège
+    attente = tps_chill
+    #Initialisation des variables liées aux résultats de la partie en cours
+    score = 0
+    nb_diamants_partie = 0
+    length = 3 #Au départ, le Snake et composé d'une tête et de deux parties de corps
+    #Initialisation de la bibliothèque pygame
+    pygame.font.init()
+    #Récuperation des positions des objets intervenants dans le jeu
+    position_1 = TêteD.get_rect() #La tête du Snake
+    position_fruit = fruit.get_rect() #Le fruit
+    position_diamant = diamant.get_rect() #Le diamant
+    position_piège = piège.get_rect() #Le piège
+
+    #On agrandit les listes des abscisses et ordonnées du Snake pour être sûr de pouvoir
+    #stocker toutes les parties de corps du Snake
+    for i in range(0,1000): #On peut en stocker jusqu'à 1000, soit beaucoup plus que le score
+        #maximum permis par la taille de l'écran du jeu
+        x.append(-100)
+        y.append(-100)
+
+    #Insertion des coordonnées de la tête dans leur liste respective
+    x[0] = position_1.x
+    y[0] = position_1.y
+
+    #Position aléatoire est donnée aux premiers fruit, diamant et piège
+    position_fruit.x = randint(2,10)*step
+    position_fruit.y = randint(2,10)*step
+    
+    position_diamant.x = ancien_position_diamant_x = randint(8,15)*step
+    position_diamant.y = ancien_position_diamant_y = randint(8,15)*step
+    
+    position_piège.x = randint(8,15)*step
+    position_piège.y = randint(8,15)*step
+    #On fait apparaître le fond sur la fenêtre
+    fenetre.blit(couverture,(0,0))
+    
+    continuer = True #Initialisation de la boucle de jeu
+    myfont = pygame.font.Font(None, 36)
+    depUp = depDown = depRight = depLeft = move_init = False
+    #Changement de la variable de déplacement
+    while(continuer):
+        for event in pygame.event.get(): 
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):#Vérification de si le joueur ne quitte pas le jeu
+                continuer = False
+            if event.type == pygame.KEYDOWN:#On vérifie que le joueur appuie sur une des touches du clavier
+                if event.key == pygame.K_UP: #Touche flèche vers le haut
+                    #On vérifie que la direction est différente et on enregistre le fait que le déplacement a commencé
+                    if depUp == False and move_init == True:
+                        if depDown == True: #On interdit d'aller dans la direction opposée
+                            depUp == False
+                        else:
+                            #On enregiste le déplacement vers le haut
+                            depDown = depRight = depLeft = False 
+                            depUp = move_init = True
+                            if son == True : #Petit bruit agaçant à chaque mouvement
+                                #si le joueur a oublié de couper le son
+                                pygame.mixer.Sound.play(bruit_mouvement)
+
+                if event.key == pygame.K_DOWN: #Touche flèche vers le bas
+                    #On utilise la même logique pour chaque touche enfoncée
+                    if depDown == False:
+                        if depUp == True:
+                            depDown == False
+                        else:
+                            depRight = depLeft = depUp = False
+                            depDown = move_init = True
+                            if son == True :
+                                pygame.mixer.Sound.play(bruit_mouvement)
+
+                if event.key == pygame.K_RIGHT: #Touche flèche vers la droite
+                    if depRight == False: 
+                        if depLeft == True:
+                            depRight == False
+                        else:
+                            depLeft = depUp = depDown = False 
+                            depRight = move_init = True
+                            if son == True :
+                                pygame.mixer.Sound.play(bruit_mouvement)
+
+                if event.key == pygame.K_LEFT:#Touche flèche vers la gauche
+                    if depLeft == False:
+                        if depRight == True:
+                            depLeft == False
+                        else:
+                            depRight = depDown = depUp = False
+                            depLeft = move_init = True
+                            if son == True :
+                                pygame.mixer.Sound.play(bruit_mouvement)
+    
+        #Les coordonnées du morceau précédent sont données à chaque morceau
+        #C'est ce qui permet le déplacement
+        for i in range(length-1,0,-1):
+            x[i] = x[i-1]
+            y[i] = y[i-1]
+            
+        fenetre.blit(couverture,(0,0)) #Remplissage de l'écran par le fond pour effacer les parties du corps précédentes
+        #On fait apparaître la tête du Snake en haut à gauche de l'écran,
+        #C'est sa position de départ
+        fenetre.blit(TêteD, (0,0))
+        
+        # On modifie la position de la tête du serpent
+        if depUp:
+            #Si on va en haut, on augmente d'un pas l'ordonnée de la tête
+            y[0] = y[0] - step 
+            fenetre.blit(couverture, (0,0)) #Pour faire disparaître l'ancienne image
+            fenetre.blit(TêteH, (x[0], y[0])) #Pour faire apparaître la nouvelle image
+        #On utilise le même raisonnement pour chaque direction :
+        if depDown:
+            y[0] = y[0] + step
+            fenetre.blit(couverture, (0,0))
+            fenetre.blit(TêteB, (x[0], y[0]))
+        if depRight:
+            x[0] = x[0] + step
+            fenetre.blit(couverture, (0,0))
+            fenetre.blit(TêteD, (x[0], y[0]))
+        if depLeft:
+            x[0] = x[0] - step
+            fenetre.blit(couverture, (0,0))
+            fenetre.blit(TêteG, (x[0], y[0]))
+        #On fait apparaître chaque partie du corps de serpent
+        for i in range (1, length) :
+            #On sépare les cas car il y a une image différente pour chaque orientation
+            if x[i-1] < x[i] : #Le morceaux précedent est à gauche
+                fenetre.blit(CorpsG, (x[i], y[i]))
+            elif x[i-1] > x[i] : #Le morceaux précedent est à droite
+                fenetre.blit(CorpsD, (x[i], y[i]))
+            elif y[i-1] < y[i] : #Le morceaux précedent est en haut
+                fenetre.blit(CorpsH, (x[i], y[i]))
+            elif y[i-1] > y[i] : #Le morceaux précedent est en bas
+                fenetre.blit(CorpsB, (x[i], y[i]))
+            
+        #On vérifie que le serpent ne touche pas les bords
+        if x[0] < fenetre_rect.left: #Pour le côté gauche
+            if son == True :
+                #Petit bruit agaçant signifiant au joueur qu'il a perdu
+                pygame.mixer.Sound.play(bruit_collision)
+            continuer = False #La boucle s'arrête : le joueur a perdu.
+        if x[0] + 35 > fenetre_rect.right: #Pour le côté droit
+            if son == True :
+                pygame.mixer.Sound.play(bruit_collision)
+            continuer = False
+        if y[0] < fenetre_rect.top: #Pour la bordure supérieure
+            if son == True :
+                pygame.mixer.Sound.play(bruit_collision)
+            continuer = False
+        if y[0] + 35 > fenetre_rect.bottom: #Pour la bordure inférieure
+            if son == True :
+                pygame.mixer.Sound.play(bruit_collision)
+            continuer = False
+
+        #On fait apparaître le fruit, le diamant et parfois le piège
+        fenetre.blit(fruit, position_fruit)
+        #A chaque répétition de boucle, il y a 1% de chance qu'un diamant apparaisse s'il n'y en a pas d'affiché
+        affichage_diamant = randint(0,100) 
+        if (ancien_position_diamant_x == position_diamant.x and ancien_position_diamant_y == position_diamant.y) or affichage_diamant == 10:
+            fenetre.blit(diamant, position_diamant)
+            ancien_position_diamant_x = position_diamant.x 
+            ancien_position_diamant_y = position_diamant.y
+
+        #Apparition et disparition des pièges
+        #L'idée est de faire apparaître de temps en temps des pèges à un endroit aléatoire
+        if compteur < tps_ecran and attente == 0:
+            #On laisse le piège sur l'écran pendant un certain nombre de boucle (tps_ecran)
+            fenetre.blit(piège, position_piège)
+            compteur += 1
+            affichage = True #Signifie que l'image est affichée
+        if attente > 0 : #On attend un certain nombre de boucle (tps_chill) avant de
+            #remettre un piège
+            attente -= 1
+            affichage = False
+        if compteur == tps_ecran : #Moment où le piège disparaît
+            #On donne une nouvelle position aléatoire au piège
+            position_piège.x = randint(8,15)*step 
+            position_piège.y = randint(8,15)*step
+            for j in range(0,length): #On vérifie que le piège n'apparaît pas dans le Snake
+                while collision(position_piège.x, position_piège.y, x[j], y[j]):
+                    position_piège.x = randint(8,15)*step
+                    position_piège.y = randint(8,15)*step
+            compteur = 0
+            attente = tps_chill
+            affichage = False
+
+        #Verification de si le serpent touche un fruit
+        if collision(x[0], y[0], position_fruit.x, position_fruit.y) :
+            position_fruit.x = randint(8,15)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
+            position_fruit.y = randint(8,15)*step
+            for j in range(0,length):
+                while collision(position_fruit.x, position_fruit.y, x[j], y[j]) or collision(position_fruit.x, position_fruit.y, position_diamant.x, position_diamant.y):
+                    position_fruit.x = randint(8,15)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
+                    position_fruit.y = randint(8,15)*step
+            length = length + ajout #la longueur augmente de ajout, variable qui varie selon la difficulté
+            score = score + 1
+        
+        #Vérification si le serpent touche un diamant
+        if collision(x[0], y[0], position_diamant.x, position_diamant.y):
+            ancien_position_diamant_x= position_diamant.x
+            ancien_position_diamant_y = position_diamant.y
+            position_diamant.x = randint(8,15)*step   #Nouvelles coordonnées du fruit lorsqu'il est "mangé"
+            position_diamant.y = randint(8,15)*step
+            for j in range(0,length):
+                while collision(position_diamant.x, position_diamant.y, x[j], y[j]):
+                    ancien_position_diamant_x= position_diamant.x
+                    ancien_position_diamant_y = position_diamant.y
+                    position_diamant.x = randint(8,15)*step   #Nouvelles coordonnées du fruit si les premieres insérés ont les même coordonnées que le corps du serpent
+                    position_diamant.y = randint(8,15)*step
+            nb_diamants_partie += 1
+            
+        #Vérification si le serpent touche le piège
+        if collision(x[0], y[0], position_piège.x, position_piège.y) and compteur != 150 and affichage :
+            if son == True :
+                pygame.mixer.Sound.play(bruit_collision)
+            continuer = False
+
+        #Vérification de si la tête du serpent touche un morceau du corps
+        for i in range (1, length) :
+            if collision(x[0], y[0], x[i], y[i]) and move_init:
+                if son == True :
+                    pygame.mixer.Sound.play(bruit_collision)
+                continuer = False
+
+        #Ajout du score à l'écran
+        myfont = pygame.font.SysFont("monospace", 16)
+        score_display = myfont.render('Score: ' + str(score), True, NOIR)
+        diamant_display = myfont.render('Diamants: ' + str(nb_diamants_partie), True, NOIR)
+        fenetre.blit(score_display, (500, 50))
+        fenetre.blit(diamant_display,(500,25))
+        pygame.display.update()
+
+        #Ajout d'un retard à la boucle pour obtenir la tp de déplacement voulue
+        pygame.time.Clock().tick(tp) #ne fait la boucle que toutes les laps de temps donnés
+
+    # Pour mémoriser le fichier:                                                   
+    # Ouvrir le fichier en mode écriture
+    with open("scores_snake.txt", "r") as f:
+        previous_score = f.readlines()[-1][:-1]
+    with open('scores_snake.txt' , 'a') as f:
+        if previous_score == '_' or score > int(previous_score):
+            f.write(str(score) + '\n')
+            
+    with open("diamants.txt", "r") as f:
+        ancien_nb_diamant = f.readlines()[-1][:-1]
+    with open('diamants.txt' , 'a') as f:
+            reserve = str(int(ancien_nb_diamant)+nb_diamants_partie)
+            f.write( reserve + '\n')
+        
+    #Menu game over
+    menu_game_over = pygame_menu.Menu(
+        height=550,
+        theme=pygame_menu.themes.THEME_BLUE,
+        title='Fin de partie',
+        width=550
+        )
+    menu_game_over.add.label('Vous avez perdu !')
+    menu_game_over.add.label('Score : ' + str(score))
+    menu_game_over.add.button('Rejouer avec les mêmes paramètres', start_the_game)
+    menu_game_over.add.button('Retour au menu',run_menu)
+    menu_game_over.mainloop(surface)
+
+
+pygame.init() #On initialise la bibliothèque pygame
+
+surface = create_example_window('Menu', (640, 640))
+dossier = os.getcwd() + "\Images à télécharger pour le jeu\\"
+
+#Chargement des bruitages du jeu
+bruit_mouvement = pygame.mixer.Sound(dossier+"move.wav")
+bruit_collision = pygame.mixer.Sound(dossier+"collision.wav")
+
+#Chargement des images du jeu :
+SerpentD = pygame.image.load(dossier+"SerpentD.png").convert_alpha() #idem mais conserve la transparence de l'img
+SerpentD = pygame.transform.scale(SerpentD,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
+SerpentH = pygame.transform.rotate(SerpentD, 90)
+SerpentG = pygame.transform.rotate(SerpentH, 90)
+SerpentB = pygame.transform.rotate(SerpentG, 90)
+CorpsSerpentD = pygame.image.load(dossier+"CorpsSerpentD.png").convert_alpha()
+CorpsSerpentD = pygame.transform.scale(CorpsSerpentD,(35,35))
+CorpsSerpentH = pygame.transform.rotate(CorpsSerpentD, 90)
+CorpsSerpentG = pygame.transform.rotate(CorpsSerpentH, 90)
+CorpsSerpentB = pygame.transform.rotate(CorpsSerpentG, 90)
+Souris = pygame.image.load(dossier+"Souris.png").convert_alpha() #idem mais conserve la transparence de l'img
+Souris = pygame.transform.scale(Souris,(35,35))
+
+CanardD = pygame.image.load(dossier+"CanardD.png").convert_alpha() #idem mais conserve la transparence de l'img
+CanardD = pygame.transform.scale(CanardD,(35,35)) #On modifie la taille (et les proportions) de l'img en 10x10 pixels
+CanardH = pygame.transform.rotate(CanardD, 90)
+CanardG = pygame.transform.rotate(CanardH, 90)
+CanardB = pygame.transform.rotate(CanardG, 90)
+CanetonD = pygame.image.load(dossier+"CanetonD.png").convert_alpha()
+CanetonD = pygame.transform.scale(CanetonD,(35,35))
+CanetonH = pygame.transform.rotate(CanetonD, 90)
+CanetonG = pygame.transform.rotate(CanetonH, 90)
+CanetonB = pygame.transform.rotate(CanetonG, 90)
+Pain = pygame.image.load(dossier+"Pain.png").convert_alpha() #idem mais conserve la transparence de l'img
+Pain = pygame.transform.scale(Pain,(35,35))
+
+
+PouleD = pygame.image.load(dossier+"PouleD.png").convert_alpha()
+PouleD = pygame.transform.scale(PouleD,(35,35))
+PouleH = pygame.transform.rotate(PouleD, 90)
+PouleG = pygame.transform.rotate(PouleH, 90)
+PouleB = pygame.transform.rotate(PouleG, 90)
+PoussinD = pygame.image.load(dossier+"PoussinD.png").convert_alpha()
+PoussinD = pygame.transform.scale(PoussinD,(35,35))
+PoussinH = pygame.transform.rotate(PoussinD, 90)
+PoussinG = pygame.transform.rotate(PoussinH, 90)
+PoussinB = pygame.transform.rotate(PoussinG, 90)
+Asticot = pygame.image.load(dossier+"Asticot.png").convert_alpha() #idem mais conserve la transparence de l'img
+Asticot = pygame.transform.scale(Asticot,(35,35))
+
+GirafeD = pygame.image.load(dossier+"GirafeD.png").convert_alpha()
+GirafeD = pygame.transform.scale(GirafeD,(35,35))
+GirafeH = pygame.transform.rotate(GirafeD, 90)
+GirafeG = pygame.transform.rotate(GirafeH, 90)
+GirafeB = pygame.transform.rotate(GirafeG, 90)
+CouGirafeD = pygame.image.load(dossier+"CouGirafeD.png").convert_alpha()
+CouGirafeD = pygame.transform.scale(CouGirafeD,(35,35))
+CouGirafeH = pygame.transform.rotate(CouGirafeD, 90)
+CouGirafeG = pygame.transform.rotate(CouGirafeH, 90)
+CouGirafeB = pygame.transform.rotate(CouGirafeG, 90)
+Baobab = pygame.image.load(dossier+"Baobab.png").convert_alpha() #idem mais conserve la transparence de l'img
+Baobab = pygame.transform.scale(Baobab,(35,35))
+
+MoutonD = pygame.image.load(dossier+"MoutonD.png").convert_alpha()
+MoutonD = pygame.transform.scale(MoutonD,(35,35))
+MoutonH = pygame.transform.rotate(MoutonD, 90)
+MoutonG = pygame.transform.rotate(MoutonH, 90)
+MoutonB = pygame.transform.rotate(MoutonG, 90)
+LoupD = pygame.image.load(dossier+"LoupD.png").convert_alpha()
+LoupD = pygame.transform.scale(LoupD,(35,35))
+LoupH = pygame.transform.rotate(LoupD, 90)
+LoupG = pygame.transform.rotate(LoupH, 90)
+LoupB = pygame.transform.rotate(LoupG, 90)
+TouffeHerbe = pygame.image.load(dossier+"TouffeHerbe.png").convert_alpha() #idem mais conserve la transparence de l'img
+TouffeHerbe = pygame.transform.scale(TouffeHerbe,(35,35))
+
+OursD = pygame.image.load(dossier+"OursD.png").convert_alpha()
+OursD = pygame.transform.scale(OursD,(35,35))
+OursH = pygame.transform.rotate(OursD, 90)
+OursG = pygame.transform.rotate(OursH, 90)
+OursB = pygame.transform.rotate(OursG, 90)
+AbeilleD = pygame.image.load(dossier+"AbeilleD.png").convert_alpha()
+AbeilleD = pygame.transform.scale(AbeilleD,(35,35))
+AbeilleH = pygame.transform.rotate(AbeilleD, 90)
+AbeilleG = pygame.transform.rotate(AbeilleH, 90)
+AbeilleB = pygame.transform.rotate(AbeilleG, 90)
+PotDeMiel = pygame.image.load(dossier+"PotDeMiel.png").convert_alpha() #idem mais conserve la transparence de l'img
+PotDeMiel = pygame.transform.scale(PotDeMiel,(35,35))
+
+TêteD, TêteH, TêteG, TêteB = SerpentD, SerpentH, SerpentG, SerpentB
+CorpsD, CorpsH, CorpsG, CorpsB = CorpsSerpentD, CorpsSerpentH, CorpsSerpentG, CorpsSerpentB
+fruit = Souris
+
+piège = pygame.image.load(dossier+"cactus.png").convert_alpha()
+piège = pygame.transform.scale(piège, (35,35))
+
+diamant = pygame.image.load(dossier+"Diamant.png").convert_alpha()
+diamant = pygame.transform.scale(diamant, (35,35))
+
+tp = 18 #Vitesse du jeu en mode moyen par défaut
+ajout = 1
+tps_chill = 200
+tps_ecran = 125
+
+son = True #Quand le jeu commence, le son est activé
+
+#Création de la fenêtre :
+l = 630 #largeur de la fenêtre
+h = 630 #hauteur de la fenêtre
+fenetre = pygame.display.set_mode((l,h)) #création de la fenêtre
+fenetre_rect = fenetre.get_rect()
+couverture =  pygame.image.load(dossier+"fond_simple.png").convert() #Fond
+couverture = pygame.transform.scale(couverture,fenetre.get_size()) #On adapte l'img de fond à la taille de la fenetre
+fenetre.blit(couverture,(0,0))
+pygame.display.set_caption("Snake") #On nomme la fenêtre de jeu
+
+#Rafraichissement de l'écran
+pygame.display.flip()
+
+# Code:
+background_theme = pygame_menu.themes.THEME_BLUE
+menu = pygame_menu.Menu(
+    height=h,
+    theme=background_theme,
+    title='Snake',
+    width=l
+    )
+skin_menu = pygame_menu.Menu(
+    columns=2,
+    height=h,
+    onclose=pygame_menu.events.EXIT,
+    rows=4,
+    theme=pygame_menu.themes.THEME_GREEN,
+    title='Personnages',
+    width=l
+    )
+   
+skin_menu.add.label('Acheter avec de diamants ')   
+skin_menu.add.button('Serpent (0)', set_the_skin,100)
+skin_menu.add.button('Canard (20)', set_the_skin,200)
+skin_menu.add.button('Poule (40)', set_the_skin,300)
+skin_menu.add.button('Retour au menu',run_menu)
+skin_menu.add.button('Mouton (60)', set_the_skin,400)
+skin_menu.add.button('Girafe(80)', set_the_skin,500)
+skin_menu.add.button('Ours (100)', set_the_skin,600)
+
+menu_règles = pygame_menu.Menu(
+    height=h,
+    theme=pygame_menu.themes.THEME_BLUE,
+    title='Règles et commandes',
+    width=l
+    )
+
+menu_règles.add.label('En début de partie, appuyer sur la flèche')
+menu_règles.add.label('droite pour faire apparaïtre le serpent.')
+menu_règles.add.label('Pour changer de direction,')
+menu_règles.add.label('utiliser les flèches du clavier.')
+menu_règles.add.label('Il ne faut pas percuter les murs.')
+menu_règles.add.label('De même, attention aux cactus !')
+menu_règles.add.label('Choisissez un personnage et une vitesse.')
+menu_règles.add.button('Lancez-vous !', run_menu)
+
+police = pygame.font.SysFont('freesans', 50)
+
+#On lance le menu
+run_menu()
