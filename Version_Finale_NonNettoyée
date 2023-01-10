@@ -149,7 +149,7 @@ def set_the_skin(type):
         f.write(liste_perso )
     achat_confirmé(perso, depense)
     
-def achat_confirmé(perso, depense):
+def achat_confirmé(perso, depense): #affiche une fenêtre lorsqu'on sélectionne un personnage qu'on avait déjà débloqué ou quon peut acheter
     menu_perso_choisi = pygame_menu.Menu(
         height=630,
         theme=pygame_menu.themes.THEME_BLUE,
@@ -162,7 +162,7 @@ def achat_confirmé(perso, depense):
     menu_perso_choisi.add.button('Choisir un autre personnage', skin_menu )
     menu_perso_choisi.mainloop(surface)
     
-def message_erreur():
+def message_erreur(): # s'affiche lrosqu'on n'a pas assez de diamants pour débloquer un personnage 
     menu_erreur =  pygame_menu.Menu(
         height=440,
         theme=pygame_menu.themes.THEME_BLUE,
