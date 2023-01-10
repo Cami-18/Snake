@@ -518,7 +518,7 @@ l = 630 #largeur de la fenêtre
 h = 630 #hauteur de la fenêtre
 fenetre = pygame.display.set_mode((l,h)) #création de la fenêtre
 fenetre_rect = fenetre.get_rect()
-couverture =  pygame.image.load("fond_simple.png").convert() #Fond
+couverture =  pygame.image.load(dossier+"fond_simple.png").convert() #Fond
 couverture = pygame.transform.scale(couverture,fenetre.get_size()) #On adapte l'img de fond à la taille de la fenetre
 fenetre.blit(couverture,(0,0))
 pygame.display.set_caption("Snake") #On nomme la fenêtre de jeu
