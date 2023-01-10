@@ -1,3 +1,5 @@
+'''Dans cette version, le jeu fonctionne, on peut choisir la vitesse (lente ou rapide) et le meilleur score et le score s'affiche.
+Le snake est composé d'images qui regardent toujours vers la droite.'''
 #Importation des bibliothèques nécessaires
 from pygame.locals import *
 from random import randint
