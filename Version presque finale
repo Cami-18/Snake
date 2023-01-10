@@ -92,21 +92,21 @@ def set_the_skin(type):
         fruit = Pain
         if liste_perso[1]=='0':
                 reserve -= 20
-                liste_perso = liste_perso[0] + '1' + liste_perso[2:5]
+                liste_perso = liste_perso[0] + '1' + liste_perso[2:]
     elif type == 300 and (reserve >= 40 or liste_perso[2] == '1'):
         TêteD, TêteH, TêteG, TêteB = PouleD, PouleH, PouleG, PouleB
         CorpsD, CorpsH, CorpsG, CorpsB = PoussinD, PoussinH, PoussinG, PoussinB
         fruit = Asticot
         if liste_perso[2]=='0':
                 reserve -= 40
-                liste_perso = liste_perso[:1] + '1' + liste_perso[3:5]
+                liste_perso = liste_perso[:1] + '1' + liste_perso[3:]
     elif type == 400 and (reserve >= 60 or liste_perso[3] =='1'):
         TêteD, TêteH, TêteG, TêteB = MoutonD, MoutonH, MoutonG, MoutonB
         CorpsD, CorpsH, CorpsG, CorpsB = LoupD, LoupH, LoupG, LoupB
         fruit = TouffeHerbe
         if liste_perso[3]=='0':
                 reserve -= 60
-                liste_perso = liste_perso[:3] + '1' + liste_perso[4:5]
+                liste_perso = liste_perso[:3] + '1' + liste_perso[4:]
     elif type == 500 and (reserve >= 80 or liste_perso[4] =='1'):
         TêteD, TêteH, TêteG, TêteB = GirafeD, GirafeH, GirafeG, GirafeB
         CorpsD, CorpsH, CorpsG, CorpsB = CouGirafeD, CouGirafeH, CouGirafeG, CouGirafeB
